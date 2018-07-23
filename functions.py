@@ -418,3 +418,11 @@ def contains(in_string, ref, p):
         return False
 
 
+
+def isnumber(s):
+    try:
+        float(s)
+        return True
+    except ValueError:
+        return False
+
