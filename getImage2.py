@@ -3,12 +3,18 @@ import os.path
 import pyscreenshot as ImageGrab
 import pytesseract
 import sqlite3
+import numpy as np
 
 from functions import most_common
 from functions import normalize
 from functions import contains
 from functions import isnumber
+from functions import get_isolated_number
+from functions import get_all_numbers
+
 from import_base_data import import_base_data
+from check_numbers import check_numbers
+
 from pynput.mouse import Listener
 
 global count_input
@@ -133,7 +139,7 @@ while int(fV[0]) < 90:
         if isnumber(most_common(pV[0][:])[0:2]) and isnumber(most_common(pV[0][:])[3:5]):
             fV[0] = int(most_common(pV[0][:])[0:2])
             fV[1] = int(most_common(pV[0][:])[3:5])
-
+    print(pV)
 
     for i in range(1,19):
         if len(pV[i][:]) > 1:
@@ -150,280 +156,180 @@ while int(fV[0]) < 90:
 
     print(fV)
 
-    #Check if time makes sense
-    if isnumber(fV[0]) and isnumber(fV[1]):
-        c.execute("SELECT timeMin*100+timeSec as times FROM footballdata where ID = ?", [str(matchID)])
-        times = c.fetchall()
+    #Check variables
+
+    fV = check_numbers(fV,matchID,c,firstwrite)
+
+    print(fV)
+
+    #All variables checked - Look for numbers to input where missing
+
+    all_numbers = []
+
+    for i in range(0,10):
+        all_numbers.append(get_all_numbers(input_text[i]))
+
+    #On missing values - Identify numbers to input
+
+    #If time is missing
+
+    if firstwrite == 0 and fV[0] == -1:
         c.execute("SELECT timeMin as mins FROM footballdata where ID = ?", [str(matchID)])
         mins = c.fetchall()
+        c.execute("SELECT timeSec as secs FROM footballdata where ID = ?", [str(matchID)])
+        secs = c.fetchall()
+
+        last_time = max(mins)
+        last_secs = max(secs)
+
+        last_match = 0
+        last_within_one = 0
+
+        for i in range(0,10):
+            if all_numbers[i][0] == last_time[0]:
+                last_match +=1
+                last_within_one +=1
+            elif all_numbers[i][0] - last_time[0] < 2:
+                last_within_one += 1
+
+            if last_match > 1:
+                fV[0] = all_numbers[i][0]
+                fV[1] = min(59,last_secs+7)
+            elif last_within_one > 2:
+                fV[0] = all_numbers[i][0]
+                fV[1] = 0
+
+        if fV[0] == -1:
+            pass #Do some more
+
+    anums = []
+
+
+    #if attacks/possesion is missing
+
+    if 1==1:#fV[2] == -1 or fV[3] == -1 or fV[4] == -1 or fV[5] == -1 or fV[6] == -1 or fV[7] == -1:
+        tot_cells = 0
+
+        for i in range(0,10):
+            text_list = input_text[i].splitlines()
+            for j in range(0,len(text_list)):
+                if "Attacks" in text_list[j] or "Danger" in text_list[j]:
+
+                    if len(text_list[j+1]) > 10:
+                        anums.append(get_all_numbers(text_list[j+1]))
+                        tot_cells += len(get_all_numbers(text_list[j+1]))
+                    elif len(text_list[j + 2]) > 10:
+                        anums.append(get_all_numbers(text_list[j + 2]))
+                        tot_cells += len(get_all_numbers(text_list[j + 2]))
+                    elif len(text_list[j + 3]) > 10:
+                        anums.append(get_all_numbers(text_list[j + 3]))
+                        tot_cells += len(get_all_numbers(text_list[j + 3]))
+                    elif len(text_list[j + 4]) > 10:
+                        anums.append(get_all_numbers(text_list[j + 4]))
+                        tot_cells += len(get_all_numbers(text_list[j + 4]))
+
+        ave_cells = tot_cells / 10
+
+        obs1 = []
+        obs2 = []
+        obs3 = []
+        obs4 = []
+        obs5 = []
+        obs6 = []
+
+
+        if ave_cells > 3 and ave_cells < 5.75:
+            for i in range(0,len(anums)):
+                if len(anums[i]) == 4:
+                    obs1.append(anums[i][0])
+                    obs2.append(anums[i][1])
+                    obs3.append(anums[i][2])
+                    obs4.append(anums[i][3])
+
+            fV[2] = most_common(obs1)
+            fV[3] = most_common(obs2)
+            fV[4] = most_common(obs3)
+            fV[5] = most_common(obs4)
+
+            pos1 = float(fV[2]) * 1.5
+            pos2 = float(fV[3]) * 1.5
+            pos3 = float(fV[4])
+            pos4 = float(fV[5])
+
+            ep1 = 100 * (pos1 + pos3) / (pos1 + pos2 + pos3 + pos4)
+            ep2 = 100 - ep1
+
+            est_pos1 = str(round(ep1))
+            est_pos2 = str(round(ep2))
+
+            fV[7] = (est_pos1)
+            fV[8] = (est_pos2)
+
+
+        elif ave_cells >= 5.75:
+            for i in range(0, len(anums)):
+                if len(anums[i]) == 6:
+                    obs1.append(anums[i][0])
+                    obs2.append(anums[i][1])
+                    obs3.append(anums[i][2])
+                    obs4.append(anums[i][3])
+                    obs5.append(anums[i][4])
+                    obs6.append(anums[i][5])
+
+            fV[2] = most_common(obs1)
+            fV[3] = most_common(obs2)
+            fV[4] = most_common(obs3)
+            fV[5] = most_common(obs4)
+            fV[6] = most_common(obs5)
+            fV[7] = most_common(obs6)
 
-        check_number = 1
 
-        #Check if time numbers are reasonable
-        if fV[0] < 0 or fV[0] > 90:
-            check_number = 0
-        if fV[1] < 0 or fV[1] > 59:
-            check_number = 0
+    # if shots on target is missing
 
-        if len(times) > 1:
-            if fV[0] < max(mins)[0] and (fV[0] > 55 or fV[0] < 45):
-                check_number = 0
-            if fV[0] > max(mins)[0]+2 and firstwrite == 0:
-                check_number = 0
+    anums = []
 
-        if check_number == 0:
-            fV[0] = -1
-            fV[1] = -1
+    obs1 = []
+    obs2 = []
 
+    if 2==2:
+        for i in range(0, 10):
+            text_list = input_text[i].splitlines()
 
-    #Check if attacks makes sense
-    if isnumber(fV[2]) & isnumber(fV[3]):
+            for j in range(0, len(text_list)):
+                if "On T" in text_list[j] or "n Ta" in text_list[j]:
+                    if len(get_all_numbers(text_list[j])) == 2:
+                        anums.append(get_all_numbers(text_list[j]))
+                    elif len(get_all_numbers(text_list[j])) > 2:
+                        pass
+                    else:
+                        pass
 
-        c.execute("SELECT att1 as mins FROM footballdata where ID = ?", [str(matchID)])
-        att1 = c.fetchall()
-        c.execute("SELECT att2 as mins FROM footballdata where ID = ?", [str(matchID)])
-        att2 = c.fetchall()
+        if len(anums) > 0:
+            for i in range(0,len(anums)):
+                obs1.append(anums[i][0])
+                obs2.append(anums[i][1])
 
-        check_number = 1
+            fV[8] = most_common(obs1)
+            fV[9] = most_common(obs2)
 
-        if fV[0] >= 0:
-            if fV[2] > fV[0]*3+20 or fV[3] > fV[0]*3+20:
-                check_number = 0
-            if fV[2]+fV[3]+10 < fV[0]*0.7:
-                check_number = 0
+    # if shots off target is missing
 
-        if len(att1) > 1:
-            if fV[2] < max(att1)[0]:
-                check_number = 0
-            if fV[3] < max(att2)[0]:
-                check_number = 0
+    if 3 == 3:
+        for i in range(0, 10):
+            text_list = input_text[i].splitlines()
 
-        if check_number == 0:
-            fV[2] = -1
-            fV[3] = -1
+            for j in range(0, len(text_list)):
+                if "Off " in text_list[j] or "f Ta" in text_list[j]:
+                    pass#Continue code here when needed
 
+    # If goals are missing
 
-    #Check if dangerous attacks makes sense
-    if isnumber(fV[4]) & isnumber(fV[5]):
+    if 7 == 7:
+        for i in range(0, 10):
+            text_list = input_text[i].splitlines()
+            #print(text_list)
 
-        c.execute("SELECT dng1 as mins FROM footballdata where ID = ?", [str(matchID)])
-        dng1 = c.fetchall()
-        c.execute("SELECT dng2 as mins FROM footballdata where ID = ?", [str(matchID)])
-        dng2 = c.fetchall()
-
-        check_number = 1
-
-        if fV[0] >= 0:
-            if fV[4] > fV[0] * 2 + 20 or fV[5] > fV[0] * 2 + 20:
-                check_number = 0
-            if fV[4] + fV[5] + 10 < fV[0] * 0.4:
-                check_number = 0
-
-        if len(dng1) > 1:
-            if fV[2] < max(dng1)[0]:
-                check_number = 0
-            if fV[3] < max(dng2)[0]:
-                check_number = 0
-
-        if fV[2] > 0 & fV[3] > 0:
-            if fV[4]>fV[2]:
-                check_number = 0
-            if fV[5]>fV[3]:
-                check_number = 0
-
-        if check_number == 0:
-            fV[4] = -1
-            fV[5] = -1
-
-    #Check if possesion makes sense
-    if isnumber(fV[6]) & isnumber(fV[7]):
-
-        check_number = 1
-
-        if fV[6]+fV[7] != 100:
-            check_number = 0
-
-        if check_number == 0:
-            fV[6] = -1
-            fV[7] = -1
-
-    # Check if shots on target makes sense
-    if isnumber(fV[8]) & isnumber(fV[9]):
-
-        c.execute("SELECT onT1 as mins FROM footballdata where ID = ?", [str(matchID)])
-        onT1 = c.fetchall()
-        c.execute("SELECT onT2 as mins FROM footballdata where ID = ?", [str(matchID)])
-        onT2 = c.fetchall()
-
-        check_number = 1
-
-        if len(onT1) > 1 and len(onT2) > 1:
-            if fV[8] < max(onT1)[0]:
-                check_number = 0
-            if fV[9] < max(onT2)[0]:
-                check_number = 0
-
-                if fV[0] > 0:
-                    if (fV[8] - max(onT1)[0]) > (fV[0] - max(mins)[0]) + 2:
-                        check_number = 0
-                    if (fV[9] - max(onT2)[0]) > (fV[0] - max(mins)[0]) + 2:
-                        check_number = 0
-
-        if fV[8] > fV[0]/3+5 or fV[9] > fV[0]/3+5:
-            check_number = 0
-
-
-
-        if check_number == 0:
-            fV[8] = -1
-            fV[9] = -1
-
-    #Check if shots off target makes sense
-    if isnumber(fV[10]) & isnumber(fV[11]):
-
-        c.execute("SELECT offT1 as mins FROM footballdata where ID = ?", [str(matchID)])
-        offT1 = c.fetchall()
-        c.execute("SELECT offT2 as mins FROM footballdata where ID = ?", [str(matchID)])
-        offT2 = c.fetchall()
-
-        check_number = 1
-
-        if len(offT1) > 1 and len(offT2) > 1:
-            if fV[10] < max(offT1)[0]:
-                check_number = 0
-            if fV[11] < max(offT2)[0]:
-                check_number = 0
-
-            if fV[0] > 0:
-                if (fV[10] - max(offT1)[0]) > (fV[0] - max(mins)[0]) + 2:
-                    check_number = 0
-                if (fV[11] - max(offT2)[0]) > (fV[0] - max(mins)[0]) + 2:
-                    check_number = 0
-
-        if fV[10] > fV[0] / 3 + 5 or fV[11] > fV[0] / 3 + 5:
-            check_number = 0
-
-        if check_number == 0:
-            fV[10] = -1
-            fV[11] = -1
-
-    #Check if yellow cards makes sense
-    if isnumber(fV[12]) & isnumber(fV[13]):
-
-        c.execute("SELECT yel1 as mins FROM footballdata where ID = ?", [str(matchID)])
-        yel1 = c.fetchall()
-        c.execute("SELECT yel2 as mins FROM footballdata where ID = ?", [str(matchID)])
-        yel2 = c.fetchall()
-
-        check_number = 1
-
-        if len(yel1) > 1 and len(yel2) > 1:
-            if fV[12] < max(yel1)[0]:
-                check_number = 0
-            if fV[13] < max(yel2)[0]:
-                check_number = 0
-
-            if fV[0] > 0:
-                if (fV[12] - max(yel1)[0]) > (fV[0] - max(mins)[0])/10 + 3:
-                    check_number = 0
-                if (fV[13] - max(yel2)[0]) > (fV[0] - max(mins)[0])/10 + 3:
-                    check_number = 0
-
-            if fV[12] > 10 or fV[13] > 10:
-                check_number = 0
-
-        if check_number == 0:
-            fV[12] = -1
-            fV[13] = -1
-
-    #Check if red cards makes sense
-    if isnumber(fV[14]) & isnumber(fV[15]):
-
-        c.execute("SELECT red1 as mins FROM footballdata where ID = ?", [str(matchID)])
-        red1 = c.fetchall()
-        c.execute("SELECT red2 as mins FROM footballdata where ID = ?", [str(matchID)])
-        red2 = c.fetchall()
-
-        check_number = 1
-
-        if len(red1) > 1 and len(red2) > 1:
-            if fV[14] < max(red1)[0]:
-                check_number = 0
-            if fV[15] < max(red2)[0]:
-                check_number = 0
-
-            if fV[0] > 0:
-                if (fV[14] - max(red1)[0]) > (fV[0] - max(mins)[0]) / 10 + 3:
-                    check_number = 0
-                if (fV[15] - max(red2)[0]) > (fV[0] - max(mins)[0]) / 10 + 3:
-                    check_number = 0
-
-            if fV[14] > 4 or fV[15] > 4:
-                check_number = 0
-
-        if check_number == 0:
-            fV[14] = -1
-            fV[15] = -1
-
-    #Check if corners makes sense
-    if isnumber(fV[16]) & isnumber(fV[17]):
-
-        c.execute("SELECT corn1 as mins FROM footballdata where ID = ?", [str(matchID)])
-        corn1 = c.fetchall()
-        c.execute("SELECT corn2 as mins FROM footballdata where ID = ?", [str(matchID)])
-        corn2 = c.fetchall()
-
-        check_number = 1
-
-        if len(corn1) > 1 and len(corn2) > 1:
-            if fV[16] < max(corn1)[0]:
-                check_number = 0
-            if fV[17] < max(corn2)[0]:
-                check_number = 0
-
-            if fV[0] > 0:
-                if (fV[16] - max(corn1)[0]) > (fV[0] - max(mins)[0]) / 10 + 3:
-                    check_number = 0
-                if (fV[17] - max(corn2)[0]) > (fV[0] - max(mins)[0]) / 10 + 3:
-                    check_number = 0
-
-        if check_number == 0:
-            fV[14] = -1
-            fV[15] = -1
-
-    #Check if score makes sense
-    if isnumber(fV[18]) & isnumber(fV[19]):
-
-        c.execute("SELECT score1 as mins FROM footballdata where ID = ?", [str(matchID)])
-        score1 = c.fetchall()
-        c.execute("SELECT score2 as mins FROM footballdata where ID = ?", [str(matchID)])
-        score2 = c.fetchall()
-
-        check_number = 1
-
-        if len(score1) > 1 and len(score2) > 1:
-            if fV[18] < max(score1)[0]:
-                check_number = 0
-            if fV[19] < max(score2)[0]:
-                check_number = 0
-
-            if fV[0] > 0:
-                if (fV[18] - max(score1)[0]) > (fV[0] - max(mins)[0]) / 20 + 2:
-                    check_number = 0
-                if (fV[19] - max(score2)[0]) > (fV[0] - max(mins)[0]) / 20 + 2:
-                    check_number = 0
-
-        if score1 > 20 or score2 > 20:
-            check_number = 0
-
-        if check_number == 0:
-            fV[18] = -1
-            fV[19] = -1
-
-    #All variables checked
-
-    for i in range(0,1):
-        
+    #If values still missing - Find reasonable numbers to input
 
     #Store variables in sqlite database
 

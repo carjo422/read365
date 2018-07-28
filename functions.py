@@ -322,6 +322,62 @@ def most_common(L):
   # pick the highest-count/earliest item
   return max(groups, key=_auxfun)[0]
 
+def get_all_numbers(string):
+
+    list = []
+
+    string = string.replace("\n","")
+    string = string.replace(".","")
+    string = string.upper()
+    string = string.replace("I", "1")
+    string = string.replace("'I", "1")
+    string = string.replace("I", "1")
+
+    maxcalc=-1
+
+    for i in range(0,len(string)):
+        if i > maxcalc:
+            if i == 0:
+                if isnumber(string[i]) and isnumber(string[i+1]) == False:
+                    list.append(int(string[i]))
+                    maxcalc = i
+                elif isnumber(string[i:i+2]) and isnumber(string[i+2]) == False:
+                    list.append(int(string[i:i+2]))
+                    maxcalc = i+1
+                elif isnumber(string[i:i + 3]) and isnumber(string[i+3]) == False:
+                    list.append(int(string[i:i + 3]))
+                    maxcalc = i+2
+
+            if i > 0 and i < len(string)-3:
+                if isnumber(string[i]) and isnumber(string[i+1]) == False and isnumber(string[i-1]) == False:
+                    list.append(int(string[i]))
+                    maxcalc = i
+                elif isnumber(string[i:i + 2]) and isnumber(string[i+2]) == False and isnumber(string[i - 1]) == False:
+                    list.append(int(string[i:i + 2]))
+                    maxcalc = i+1
+                elif isnumber(string[i:i + 3]) and isnumber(string[i+3]) == False and isnumber(string[i - 1]) == False:
+                    list.append(int(string[i:i + 3]))
+                    maxcalc = i+2
+
+            if i == len(string)-2:
+                if isnumber(string[i]) and isnumber(string[i + 1]) == False and isnumber(string[i - 1]) == False:
+                    list.append(int(string[i]))
+                    maxcalc = i
+                elif isnumber(string[i:i + 2]) and isnumber(string[i - 1]) == False:
+                    list.append(int(string[i:i + 2]))
+                    maxcalc = i + 1
+
+            if i == len(string) - 1:
+                if isnumber(string[i]) and isnumber(string[i - 1]) == False:
+                    list.append(int(string[i]))
+                    maxcalc = i
+
+            if i == len(string):
+                if isnumber(string[i]) and isnumber(string[i - 1]) == False:
+                    list.append(int(string[i]))
+                    maxcalc = i
+
+    return list
 
 def get_isolated_number(string):
 
@@ -380,6 +436,16 @@ def get_isolated_number(string):
                     #    list.append(string[i:i + 2])
                     #elif string[i - 1] == " " and string[i + 4].isdigit() == False and string[i + 5] == " ":
                     #    list.append(string[i:i + 3])
+
+    for i in range(0,len(list)):
+        list[i] = list[i].replace("c", "")
+        list[i] = list[i].replace("C", "")
+        list[i] = list[i].replace("/", "")
+        list[i] = list[i].replace("\.", "")
+        list[i] = list[i].replace("<", "")
+        list[i] = list[i].replace(">", "")
+        list[i] = list[i].replace("(", "")
+        list[i] = list[i].replace(")", "")
 
     return list
 

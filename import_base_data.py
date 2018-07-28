@@ -22,15 +22,8 @@ def import_base_data(pV,input_text,t):
         for k in range(0,len(text_list)):
 
             text_list[k] = text_list[k].replace("O", "0")
+            text_list[k] = text_list[k].replace("'I", "1")
             text_list[k] = text_list[k].upper()
-
-            if k > 0 and k < len(text_list):
-                if text_list[k - 1] == " " or text_list[k-1].isdigit():
-                    if text_list[k + 1] == " " or text_list[k+1].isdigit():
-
-                        text_list[k] = text_list[k].replace("I", "1")
-                        text_list[k] = text_list[k].replace("'I", "1")
-                        text_list[k] = text_list[k].replace("I", "1")
 
         #Get time:
         time_row = len(text_list)
@@ -45,10 +38,6 @@ def import_base_data(pV,input_text,t):
                     if isnumber(text_list[i][p-2:p]):
                         pV[0].append(text_list[i][p-2:p+3])
                         time_row = i
-
-
-        #Find out if possession is included or not
-            #PUT CODE HERE
 
 
         #Get attacks, dangerous attacks, possession
@@ -144,9 +133,23 @@ def import_base_data(pV,input_text,t):
         #Get score
         for i in range(0, time_row):
             #print(text_list[i])
-            if len(get_isolated_number(text_list[i])) > 1:
+            if len(get_isolated_number(text_list[i])) == 2:
                 pV[17].append(get_isolated_number(text_list[i])[0])
                 pV[18].append(get_isolated_number(text_list[i])[1])
+
+            elif len(get_isolated_number(text_list[i])) > 2:
+
+                nums = get_isolated_number(text_list[i])
+
+                for j in range(0,len(nums)):
+                    if nums[j]:
+                        if int(nums[j]) > 9:
+                            del nums[j]
+
+                if len(nums) == 2:
+
+                    pV[17].append(nums[0])
+                    pV[18].append(nums[1])
 
 
     return pV
