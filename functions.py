@@ -335,47 +335,48 @@ def get_all_numbers(string):
 
     maxcalc=-1
 
-    for i in range(0,len(string)):
-        if i > maxcalc:
-            if i == 0:
-                if isnumber(string[i]) and isnumber(string[i+1]) == False:
-                    list.append(int(string[i]))
-                    maxcalc = i
-                elif isnumber(string[i:i+2]) and isnumber(string[i+2]) == False:
-                    list.append(int(string[i:i+2]))
-                    maxcalc = i+1
-                elif isnumber(string[i:i + 3]) and isnumber(string[i+3]) == False:
-                    list.append(int(string[i:i + 3]))
-                    maxcalc = i+2
+    if len(string)>3:
+        for i in range(0,len(string)):
+            if i > maxcalc:
+                if i == 0:
+                    if isnumber(string[i]) and isnumber(string[i+1]) == False:
+                        list.append(int(string[i]))
+                        maxcalc = i
+                    elif isnumber(string[i:i+2]) and isnumber(string[i+2]) == False:
+                        list.append(int(string[i:i+2]))
+                        maxcalc = i+1
+                    elif isnumber(string[i:i + 3]) and isnumber(string[i+3]) == False:
+                        list.append(int(string[i:i + 3]))
+                        maxcalc = i+2
 
-            if i > 0 and i < len(string)-3:
-                if isnumber(string[i]) and isnumber(string[i+1]) == False and isnumber(string[i-1]) == False:
-                    list.append(int(string[i]))
-                    maxcalc = i
-                elif isnumber(string[i:i + 2]) and isnumber(string[i+2]) == False and isnumber(string[i - 1]) == False:
-                    list.append(int(string[i:i + 2]))
-                    maxcalc = i+1
-                elif isnumber(string[i:i + 3]) and isnumber(string[i+3]) == False and isnumber(string[i - 1]) == False:
-                    list.append(int(string[i:i + 3]))
-                    maxcalc = i+2
+                if i > 0 and i < len(string)-3:
+                    if isnumber(string[i]) and isnumber(string[i+1]) == False and isnumber(string[i-1]) == False:
+                        list.append(int(string[i]))
+                        maxcalc = i
+                    elif isnumber(string[i:i + 2]) and isnumber(string[i+2]) == False and isnumber(string[i - 1]) == False:
+                        list.append(int(string[i:i + 2]))
+                        maxcalc = i+1
+                    elif isnumber(string[i:i + 3]) and isnumber(string[i+3]) == False and isnumber(string[i - 1]) == False:
+                        list.append(int(string[i:i + 3]))
+                        maxcalc = i+2
 
-            if i == len(string)-2:
-                if isnumber(string[i]) and isnumber(string[i + 1]) == False and isnumber(string[i - 1]) == False:
-                    list.append(int(string[i]))
-                    maxcalc = i
-                elif isnumber(string[i:i + 2]) and isnumber(string[i - 1]) == False:
-                    list.append(int(string[i:i + 2]))
-                    maxcalc = i + 1
+                if i == len(string)-2:
+                    if isnumber(string[i]) and isnumber(string[i + 1]) == False and isnumber(string[i - 1]) == False:
+                        list.append(int(string[i]))
+                        maxcalc = i
+                    elif isnumber(string[i:i + 2]) and isnumber(string[i - 1]) == False:
+                        list.append(int(string[i:i + 2]))
+                        maxcalc = i + 1
 
-            if i == len(string) - 1:
-                if isnumber(string[i]) and isnumber(string[i - 1]) == False:
-                    list.append(int(string[i]))
-                    maxcalc = i
+                if i == len(string) - 1:
+                    if isnumber(string[i]) and isnumber(string[i - 1]) == False:
+                        list.append(int(string[i]))
+                        maxcalc = i
 
-            if i == len(string):
-                if isnumber(string[i]) and isnumber(string[i - 1]) == False:
-                    list.append(int(string[i]))
-                    maxcalc = i
+                if i == len(string):
+                    if isnumber(string[i]) and isnumber(string[i - 1]) == False:
+                        list.append(int(string[i]))
+                        maxcalc = i
 
     return list
 
@@ -487,7 +488,7 @@ def contains(in_string, ref, p):
 
 def isnumber(s):
     try:
-        float(s)
+        int(s)
         return True
     except ValueError:
         return False

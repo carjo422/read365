@@ -142,9 +142,10 @@ def import_base_data(pV,input_text,t):
                 nums = get_isolated_number(text_list[i])
 
                 for j in range(0,len(nums)):
-                    if nums[j]:
-                        if int(nums[j]) > 9:
-                            del nums[j]
+                    if len(nums) > j:
+                        if isnumber(nums[j]):
+                            if int(nums[j]) > 9:
+                                del nums[j]
 
                 if len(nums) == 2:
 
