@@ -3,6 +3,8 @@ import os.path
 import pyscreenshot as ImageGrab
 import pytesseract
 import sqlite3
+import time
+from time import sleep
 import numpy as np
 
 from functions import most_common
@@ -16,6 +18,7 @@ from closeOCR import OCRscore
 from closeOCR import OCRcorner
 from closeOCR import ShotsOn
 from closeOCR import ShotsOff
+from closeOCR import OCRattacks
 
 from import_base_data import import_base_data
 from check_numbers import check_numbers
@@ -29,6 +32,7 @@ global input_text
 
 conn = sqlite3.connect('gamedata.db')
 firstwrite = 1
+n_iter = 10
 
 #c.execute("""CREATE TABLE footballdata (
 #                ID integer,
@@ -112,16 +116,26 @@ while 1 > 0:
 
     c = conn.cursor()
 
-    input_text[0] = pytesseract.image_to_string(ImageGrab.grab(bbox=(c1, c2 + c2 * 0.2, c3, c4 + c2 * 0.2)))
-    input_text[1] = pytesseract.image_to_string(ImageGrab.grab(bbox=(c1, c2 + c2 * 0.5, c3, c4 + c2 * 0.5)))
-    input_text[2] = pytesseract.image_to_string(ImageGrab.grab(bbox=(c1, c2 - c2 * 0.8, c3, c4 - c2 * 0.2)))
-    input_text[3] = pytesseract.image_to_string(ImageGrab.grab(bbox=(c1, c2 - c2 * 0.2, c3, c4 - c2 * 0.2)))
-    input_text[4] = pytesseract.image_to_string(ImageGrab.grab(bbox=(c1, c2 - c2 * 0.3, c3, c4 - c2 * 0.3)))
-    input_text[5] = pytesseract.image_to_string(ImageGrab.grab(bbox=(c1, c2 + c2 * 0.2, c3, c4 + c2 * 0.1)))
-    input_text[6] = pytesseract.image_to_string(ImageGrab.grab(bbox=(c1, c2 + c2 * 0.5, c3, c4 + c2 * 0.2)))
-    input_text[7] = pytesseract.image_to_string(ImageGrab.grab(bbox=(c1, c2 + c2 * 0.3, c3, c4 + c2 * 0.1)))
-    input_text[8] = pytesseract.image_to_string(ImageGrab.grab(bbox=(c1, c2 + c2 * 0.4, c3, c4 + c2 * 0.2)))
-    input_text[9] = pytesseract.image_to_string(ImageGrab.grab(bbox=(c1, c2 + c2 * 0.4, c3, c4 + c2 * 0.1)))
+    if n_iter > 0:
+        input_text[0] = pytesseract.image_to_string(ImageGrab.grab(bbox=(c1, c2 + c2 * 0.2, c3, c4 + c2 * 0.2)))
+    if n_iter > 1:
+        input_text[1] = pytesseract.image_to_string(ImageGrab.grab(bbox=(c1, c2 + c2 * 0.5, c3, c4 + c2 * 0.5)))
+    if n_iter > 2:
+        input_text[2] = pytesseract.image_to_string(ImageGrab.grab(bbox=(c1, c2 - c2 * 0.8, c3, c4 - c2 * 0.2)))
+    if n_iter > 3:
+        input_text[3] = pytesseract.image_to_string(ImageGrab.grab(bbox=(c1, c2 - c2 * 0.2, c3, c4 - c2 * 0.2)))
+    if n_iter > 4:
+        input_text[4] = pytesseract.image_to_string(ImageGrab.grab(bbox=(c1, c2 - c2 * 0.3, c3, c4 - c2 * 0.3)))
+    if n_iter > 5:
+        input_text[5] = pytesseract.image_to_string(ImageGrab.grab(bbox=(c1, c2 + c2 * 0.2, c3, c4 + c2 * 0.1)))
+    if n_iter > 6:
+        input_text[6] = pytesseract.image_to_string(ImageGrab.grab(bbox=(c1, c2 + c2 * 0.5, c3, c4 + c2 * 0.2)))
+    if n_iter > 7:
+        input_text[7] = pytesseract.image_to_string(ImageGrab.grab(bbox=(c1, c2 + c2 * 0.3, c3, c4 + c2 * 0.1)))
+    if n_iter > 8:
+        input_text[8] = pytesseract.image_to_string(ImageGrab.grab(bbox=(c1, c2 + c2 * 0.4, c3, c4 + c2 * 0.2)))
+    if n_iter > 9:
+        input_text[9] = pytesseract.image_to_string(ImageGrab.grab(bbox=(c1, c2 + c2 * 0.4, c3, c4 + c2 * 0.1)))
 
 
     ### Run through all ten images to compare results ###
@@ -129,7 +143,7 @@ while 1 > 0:
     pV = [[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[]]
     fV = [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1]
 
-    for t in range(0,10):
+    for t in range(0,n_iter):
         pV = import_base_data(pV,input_text,t)
         #print(input_text[t])
 
@@ -163,7 +177,7 @@ while 1 > 0:
 
     #All variables checked - Look for numbers to input where missing
 
-    fV = re_check_numbers(input_text, firstwrite, matchID, c, fV)
+    fV = re_check_numbers(input_text, firstwrite, matchID, c, fV, n_iter)
 
     print(fV)
 
@@ -174,32 +188,43 @@ while 1 > 0:
     #If numbers still missing, try finding by close OCR
 
     OCRscore([c1, c2, c3, c4])
-    cc = OCRcorner([c1, c2, c3, c4])
-    sn = ShotsOn([c1, c2, c3, c4])
-    sf = ShotsOff([c1, c2, c3, c4])
 
     #Add shots on if needed
     if fV[8] == -1 or fV[9] == -1:
+        sn = ShotsOn([c1, c2, c3, c4])
         if sn[0] > -1 and sn[1] > -1:
             fV[8] = sn[0]
             fV[9] = sn[1]
 
     #Add shots off if needed
     if fV[10] == -1 or fV[11] == -1:
+        sf = ShotsOff([c1, c2, c3, c4])
         if sf[0] > -1 and sf[1] > -1:
             fV[10] = sf[0]
             fV[11] = sf[1]
 
     #Add cards and corners if needed
-    if fV[11] == -1 or fV[12] == -1 or fV[13] == -1 or fV[14] == -1 or fV[15] == -1 or fV[16] == -1:
+    if fV[12] == -1 or fV[13] == -1 or fV[14] == -1 or fV[15] == -1 or fV[16] == -1 or fV[17] == -1:
+        cc = OCRcorner([c1, c2, c3, c4])
         if cc[0] > -1 and cc[1] > -1 and cc[2] > -1 and cc[3] > -1 and cc[4] > -1 and cc[5] > -1:
 
-            fV[11] = cc[0]
-            fV[12] = cc[1]
-            fV[13] = cc[2]
-            fV[14] = cc[3]
+            fV[12] = cc[2]
+            fV[13] = cc[3]
+            fV[14] = cc[1]
             fV[15] = cc[4]
-            fV[16] = cc[5]
+            fV[16] = cc[0]
+            fV[17] = cc[5]
+
+    #Add possesion and attacks if needed
+    if fV[2] == -1 or fV[3] == -1 or fV[4] == -1 or fV[5] == -1 or fV[6] == -1 or fV[7] == -1:
+        ap = OCRattacks([c1, c2, c3, c4])
+        if ap[0] > -1 and ap[1] > -1 and ap[2] > -1 and ap[3] > -1 and ap[4] > -1 and ap[5] > -1:
+            fV[2] = ap[0]
+            fV[3] = ap[1]
+            fV[4] = ap[2]
+            fV[5] = ap[3]
+            fV[6] = ap[4]
+            fV[7] = ap[5]
 
     print(fV)
 
@@ -207,15 +232,35 @@ while 1 > 0:
 
     print(fV)
 
+    OCRattacks([c1, c2, c3, c4])
+
     #Store variables in sqlite database
 
-    c.execute("""INSERT INTO
-                footballdata (
-                    ID,odds1,oddsX,odds2,b25,o25,timeMin,timeSec,att1,att2,dng1,dng2,pos1,pos2,onT1,onT2,offT1,offT2,yel1,yel2,red1,red2,corn1,corn2,score1,score2)
-                VALUES
-                    (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
-                    (matchID,odds1,oddsX,odds2,odds25u,odds25o,fV[0],fV[1],fV[2],fV[3],fV[4],fV[5],fV[6],fV[7],fV[8],fV[9],fV[10],fV[11],fV[12],fV[13],fV[14],fV[15],fV[16],fV[17],fV[18],fV[19]))
-    conn.commit()
-    c.close()
-    firstwrite = 0
+
+    if -1 in fV:
+        print("Unsuccesful save of data")
+        n_iter = 10
+    else:
+
+        c.execute("""INSERT INTO
+                    footballdata (
+                        ID,odds1,oddsX,odds2,b25,o25,timeMin,timeSec,att1,att2,dng1,dng2,pos1,pos2,onT1,onT2,offT1,offT2,yel1,yel2,red1,red2,corn1,corn2,score1,score2)
+                    VALUES
+                        (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
+                  (matchID, odds1, oddsX, odds2, odds25u, odds25o, fV[0], fV[1], fV[2], fV[3], fV[4], fV[5], fV[6],
+                   fV[7], fV[8], fV[9], fV[10], fV[11], fV[12], fV[13], fV[14], fV[15], fV[16], fV[17], fV[18], fV[19]))
+        conn.commit()
+        c.close()
+        firstwrite = 0
+
+        print("Succesful save to database")
+
+        if n_iter > 5:
+            n_iter -= 2
+        elif n_iter > 2:
+            n_iter -=1
+        else:
+            pass
+
+    sleep(20-n_iter*2)
 

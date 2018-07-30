@@ -12,7 +12,7 @@ def check_numbers(fV, matchID,c,firstwrite):
         check_number = 1
 
         # Check if time numbers are reasonable
-        if fV[0] < 0 or fV[0] > 90:
+        if fV[0] < 0 or fV[0] > 100:
             check_number = 0
         if fV[1] < 0 or fV[1] > 59:
             check_number = 0

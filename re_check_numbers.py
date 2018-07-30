@@ -1,9 +1,8 @@
 from functions import get_all_numbers
 from functions import most_common
 
-def re_check_numbers(input_text,firstwrite,matchID,c,fV):
+def re_check_numbers(input_text,firstwrite,matchID,c,fV,n_iter):
     all_numbers = []
-    error1 = []
 
     # If time is missing
 
@@ -24,8 +23,6 @@ def re_check_numbers(input_text,firstwrite,matchID,c,fV):
 
         for i in range(0, 10):
 
-            error1.append(input_text[i][0])
-
             if all_numbers[i][0] == last_time[0]:
                 last_match += 1
                 last_within_one += 1
@@ -39,18 +36,14 @@ def re_check_numbers(input_text,firstwrite,matchID,c,fV):
                 fV[0] = all_numbers[i][0]
                 fV[1] = 0
 
-        if fV[0] > -1:
-            error1 = []
-
     anums = []
-    error2 = []
 
     # if attacks/possesion is missing
 
     if fV[2] == -1 or fV[3] == -1 or fV[4] == -1 or fV[5] == -1 or fV[6] == -1 or fV[7] == -1:
         tot_cells = 0
-
-        for i in range(0, 10):
+        n = 0
+        for i in range(0, n_iter):
             text_list = input_text[i].splitlines()
 
             for j in range(0, len(text_list)):
@@ -59,19 +52,21 @@ def re_check_numbers(input_text,firstwrite,matchID,c,fV):
                     if len(text_list[j + 1]) > 10:
                         anums.append(get_all_numbers(text_list[j + 1]))
                         tot_cells += len(get_all_numbers(text_list[j + 1]))
+                        n+=1
                     elif len(text_list[j + 2]) > 10:
                         anums.append(get_all_numbers(text_list[j + 2]))
                         tot_cells += len(get_all_numbers(text_list[j + 2]))
+                        n += 1
                     elif len(text_list[j + 3]) > 10:
                         anums.append(get_all_numbers(text_list[j + 3]))
                         tot_cells += len(get_all_numbers(text_list[j + 3]))
+                        n += 1
                     elif len(text_list[j + 4]) > 10:
                         anums.append(get_all_numbers(text_list[j + 4]))
                         tot_cells += len(get_all_numbers(text_list[j + 4]))
+                        n += 1
 
-                    error2.append(anums[-1])
-
-        ave_cells = tot_cells / 10
+        ave_cells = tot_cells / n
 
         obs1 = []
         obs2 = []
@@ -129,25 +124,19 @@ def re_check_numbers(input_text,firstwrite,matchID,c,fV):
                 fV[6] = most_common(obs5)
                 fV[7] = most_common(obs6)
 
-        if fV[2] > -1:
-            error2 = []
-
     # if shots on target is missing
 
     anums = []
-    error3 = []
 
     obs1 = []
     obs2 = []
 
     if fV[8] == -1 or fV[9] == -1:
-        for i in range(0, 10):
+        for i in range(0, n_iter):
             text_list = input_text[i].splitlines()
 
             for j in range(0, len(text_list)):
                 if "On T" in text_list[j] or "n Ta" in text_list[j]:
-
-                    error3.append(text_list[j])
 
                     if len(get_all_numbers(text_list[j])) == 2:
                         anums.append(get_all_numbers(text_list[j]))
@@ -164,12 +153,7 @@ def re_check_numbers(input_text,firstwrite,matchID,c,fV):
             fV[8] = most_common(obs1)
             fV[9] = most_common(obs2)
 
-        if fV[8] > -1:
-            error3 = []
-
     # if shots off target is missing
-
-    error4 = []
 
     if fV[10] == -1 or fV[11] == -1 or fV[12] == -1 or fV[13] == -1 or fV[14] == -1 or fV[15] == -1 or fV[16] == -1 or fV[
         17] == -1:
@@ -178,41 +162,13 @@ def re_check_numbers(input_text,firstwrite,matchID,c,fV):
 
             for j in range(0, len(text_list)):
                 if "Off " in text_list[j] or "f Ta" in text_list[j]:
-                    error4.append(text_list[j])
-
-        if fV[10] > -1 and fV[11] > -1 and fV[12] > -1 and fV[13] > -1 and fV[14] > -1 and fV[15] > -1 and fV[16] > -1 and \
-                        fV[17] > -1:
-            error4 = []
+                    pass
 
     # If goals are missing
 
-    error5 = []
-
     if fV[18] == -1 or fV[19] == -1:
-        for i in range(0, 10):
+        for i in range(0, n_iter):
             text_list = input_text[i].splitlines()
 
-            if len(get_all_numbers(text_list[0])) >= 2:
-                error5.append(text_list[0])
-            elif len(get_all_numbers(text_list[1])) >= 2:
-                error5.append(text_list[1])
-            elif len(get_all_numbers(text_list[2])) >= 2:
-                error5.append(text_list[2])
-
-    if fV[18] > -1 and fV[19] > -1:
-        error5 = []
-
-    # Print out error
-
-    if error1 != []:
-        print(error1)
-    if error2 != []:
-        print(error2)
-    if error3 != []:
-        print(error3)
-    if error4 != []:
-        print(error4)
-    if error5 != []:
-        print(error5)
 
     return fV

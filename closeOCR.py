@@ -2,21 +2,36 @@ import pyscreenshot as ImageGrab
 import pytesseract
 from PIL import Image
 from functions import isnumber
+from functions import get_all_numbers
 
 def OCRscore(cV):
 
-    h = (cV[2]-cV[0])*0.38
-    v1 = (cV[3] - cV[1]) * 0.10
-    v2 = (cV[3] - cV[1]) * 0.81
+    h1 = (cV[2] - cV[0]) * 0.435
+    h2 = (cV[2] - cV[0]) * 0.49
+    h3 = (cV[2] - cV[0]) * 0.51
+    h4 = (cV[2] - cV[0]) * 0.565
+    v1 = (cV[3] - cV[1]) * 0.11
+    v2 = (cV[3] - cV[1]) * 0.155
 
-    im = ImageGrab.grab(bbox=(cV[0]+h, cV[1]+v1, cV[2]-h, cV[3]-v2))
-    #im = im.convert("RGB")
-    #im.save("test.jpg","JPEG")
+    im1 = ImageGrab.grab(bbox=(cV[0] + h1, cV[1] + v1, cV[0] + h2, cV[1] + v2))
+    im2 = ImageGrab.grab(bbox=(cV[0] + h3, cV[1] + v1, cV[0] + h4, cV[1] + v2))
 
-    image_string = pytesseract.image_to_string(im, config='-c tessedit_char_whitelist=0123456789')
+    bigimage1 = im1.resize((int((h2 - h1) * 10), int((v2 - v1) * 10)), Image.NEAREST)
+    bigimage2 = im2.resize((int((h4 - h3) * 10), int((v2 - v1) * 10)), Image.NEAREST)
+    #bigimage2 = bigimage1.convert("RGB")
+    #bigimage2.save("test.jpg", "JPEG")
+
+    image_string1 = pytesseract.image_to_string(bigimage1, config='-psm 10 -c tessedit_char_whitelist=0123456789')
+    image_string2 = pytesseract.image_to_string(bigimage2, config='-psm 10 -c tessedit_char_whitelist=0123456789')
+
 
     score1 = -1
     score2 = -1
+
+    if isnumber(image_string1) == True:
+        score1 = int(image_string1)
+    if isnumber(image_string2) == True:
+        score2 = int(image_string2)
 
     scoreResult = [score1,score2]
     return scoreResult
@@ -36,15 +51,16 @@ def OCRcorner(cV):
     bigimage1 = im1.resize((int((h2 - h1) * 5), int((v2 - v1) * 5)), Image.NEAREST)
     bigimage2 = im2.resize((int((h4 - h3) * 5), int((v2 - v1) * 5)), Image.NEAREST)
 
-    bigimage1 = bigimage1.convert("RGB")
-    bigimage1.save("test.jpg","JPEG")
+    #bigimage1 = bigimage1.convert("RGB")
+    #bigimage1.save("test.jpg","JPEG")
 
     image_string1 = pytesseract.image_to_string(bigimage1, config='-psm 7 -c tessedit_char_whitelist=0123456789')
-
     image_string2 = pytesseract.image_to_string(bigimage2, config='-psm 7 -c tessedit_char_whitelist=0123456789')
 
     r = [-1,-1,-1,-1,-1,-1]
 
+    image_string1 = image_string1.replace(" ", "")
+    image_string2 = image_string2.replace(" ", "")
 
     if len(image_string1) == 3 and isnumber(image_string1) == True:
         r[0] = int(image_string1[0])
@@ -60,47 +76,14 @@ def OCRcorner(cV):
         r[4] = int(image_string2[1])
         r[5] = int(image_string2[2])
     elif len(image_string2) == 4 and isnumber(image_string2) == True:
-        r[3] = int(image_string2[0:2])
+        r[3] = int(image_string2[1])
         r[4] = int(image_string2[2])
-        r[5] = int(image_string2[3])
+        r[5] = int(image_string2[3:5])
 
     return r
 
 
 def ShotsOn(cV):
-    h1 = (cV[2] - cV[0]) * 0.26
-    h2 = (cV[2] - cV[0]) * 0.33
-    h3 = (cV[2] - cV[0]) * 0.67
-    h4 = (cV[2] - cV[0]) * 0.74
-
-    v1 = (cV[3] - cV[1]) * 0.905
-    v2 = (cV[3] - cV[1]) * 0.955
-
-    im1 = ImageGrab.grab(bbox=(cV[0] + h1, cV[1] + v1, cV[0] + h2, cV[1] + v2))
-    im2 = ImageGrab.grab(bbox=(cV[0] + h3, cV[1] + v1, cV[0] + h4, cV[1] + v2))
-
-    bigimage1 = im1.resize((int((h2 - h1) * 5), int((v2 - v1) * 5)), Image.NEAREST)
-    bigimage2 = im2.resize((int((h4 - h3) * 5), int((v2 - v1) * 5)), Image.NEAREST)
-
-    bigimage1 = bigimage1.convert("RGB")
-    bigimage1.save("test.jpg","JPEG")
-
-    image_string1 = pytesseract.image_to_string(bigimage1, config='-psm 7 -c tessedit_char_whitelist=0123456789')
-
-    image_string2 = pytesseract.image_to_string(bigimage2, config='-psm 7 -c tessedit_char_whitelist=0123456789')
-
-    s = [-1,-1]
-
-    if isnumber(image_string1):
-        s[0] = image_string1
-
-    if isnumber(image_string2):
-        s[1] = image_string2
-
-    return s
-
-
-def ShotsOff(cV):
     h1 = (cV[2] - cV[0]) * 0.26
     h2 = (cV[2] - cV[0]) * 0.33
     h3 = (cV[2] - cV[0]) * 0.67
@@ -116,9 +99,44 @@ def ShotsOff(cV):
     bigimage2 = im2.resize((int((h4 - h3) * 5), int((v2 - v1) * 5)), Image.NEAREST)
 
     bigimage1 = bigimage1.convert("RGB")
-    bigimage1.save("test.jpg","JPEG")
+    bigimage1.save("testOn1.jpg", "JPEG")
+    bigimage2 = bigimage2.convert("RGB")
+    bigimage2.save("testOn2.jpg", "JPEG")
+
+    image_string1 = pytesseract.image_to_string(bigimage1, config='-psm 7 -c tessedit_char_whitelist=0123456789')
+
+    image_string2 = pytesseract.image_to_string(bigimage2, config='-psm 7 -c tessedit_char_whitelist=0123456789')
+
+    s = [-1,-1]
+
+    if isnumber(image_string1):
+        s[0] = int(image_string1)
+
+    if isnumber(image_string2):
+        s[1] = int(image_string2)
+
+    return s
 
 
+def ShotsOff(cV):
+    h1 = (cV[2] - cV[0]) * 0.26
+    h2 = (cV[2] - cV[0]) * 0.33
+    h3 = (cV[2] - cV[0]) * 0.67
+    h4 = (cV[2] - cV[0]) * 0.74
+
+    v1 = (cV[3] - cV[1]) * 0.905
+    v2 = (cV[3] - cV[1]) * 0.995
+
+    im1 = ImageGrab.grab(bbox=(cV[0] + h1, cV[1] + v1, cV[0] + h2, cV[1] + v2))
+    im2 = ImageGrab.grab(bbox=(cV[0] + h3, cV[1] + v1, cV[0] + h4, cV[1] + v2))
+
+    bigimage1 = im1.resize((int((h2 - h1) * 5), int((v2 - v1) * 5)), Image.NEAREST)
+    bigimage2 = im2.resize((int((h4 - h3) * 5), int((v2 - v1) * 5)), Image.NEAREST)
+
+    bigimage1 = bigimage1.convert("RGB")
+    bigimage1.save("testOff1.jpg","JPEG")
+    bigimage2 = bigimage2.convert("RGB")
+    bigimage2.save("testOff2.jpg", "JPEG")
 
     image_string1 = pytesseract.image_to_string(bigimage1, config='-psm 7 -c tessedit_char_whitelist=0123456789')
 
@@ -127,9 +145,46 @@ def ShotsOff(cV):
     s = [-1, -1]
 
     if isnumber(image_string1):
-        s[0] = image_string1
+        s[0] = int(image_string1)
 
     if isnumber(image_string2):
-        s[1] = image_string2
+        s[1] = int(image_string2)
 
     return s
+
+
+
+def OCRattacks(cV):
+
+    h1 = (cV[2] - cV[0]) * 0.04
+    h2 = (cV[2] - cV[0]) * 0.94
+
+    v1 = (cV[3] - cV[1]) * 0.75
+    v2 = (cV[3] - cV[1]) * 0.82
+
+    im1 = ImageGrab.grab(bbox=(cV[0] + h1, cV[1] + v1, cV[0] + h2, cV[1] + v2))
+
+    bigimage1 = im1.resize((int((h2 - h1) * 5), int((v2 - v1) * 5)), Image.NEAREST)
+
+    #bigimage1 = bigimage1.convert("RGB")
+    #bigimage1.save("test.jpg", "JPEG")
+
+    image_string1 = pytesseract.image_to_string(bigimage1, config='-psm 7 -c tessedit_char_whitelist=0123456789')
+
+    nums = get_all_numbers(image_string1)
+
+    ap = [-1, -1, -1, -1, -1, -1]
+
+    if len(nums) == 6:
+        for i in range(0,6):
+            ap[i] = nums[i]
+    elif len(nums) == 9:
+        ap[0] = nums[0]
+        ap[1] = nums[2]
+        ap[2] = nums[3]
+        ap[3] = nums[5]
+        ap[4] = nums[6]
+        ap[5] = nums[8]
+
+    return ap
+
