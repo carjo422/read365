@@ -13,6 +13,9 @@ from functions import get_isolated_number
 from functions import get_all_numbers
 
 from closeOCR import OCRscore
+from closeOCR import OCRcorner
+from closeOCR import ShotsOn
+from closeOCR import ShotsOff
 
 from import_base_data import import_base_data
 from check_numbers import check_numbers
@@ -170,8 +173,39 @@ while 1 > 0:
 
     #If numbers still missing, try finding by close OCR
 
-    OCRscore([c1,c2,c3,c4])
+    OCRscore([c1, c2, c3, c4])
+    cc = OCRcorner([c1, c2, c3, c4])
+    sn = ShotsOn([c1, c2, c3, c4])
+    sf = ShotsOff([c1, c2, c3, c4])
 
+    #Add shots on if needed
+    if fV[8] == -1 or fV[9] == -1:
+        if sn[0] > -1 and sn[1] > -1:
+            fV[8] = sn[0]
+            fV[9] = sn[1]
+
+    #Add shots off if needed
+    if fV[10] == -1 or fV[11] == -1:
+        if sf[0] > -1 and sf[1] > -1:
+            fV[10] = sf[0]
+            fV[11] = sf[1]
+
+    #Add cards and corners if needed
+    if fV[11] == -1 or fV[12] == -1 or fV[13] == -1 or fV[14] == -1 or fV[15] == -1 or fV[16] == -1:
+        if cc[0] > -1 and cc[1] > -1 and cc[2] > -1 and cc[3] > -1 and cc[4] > -1 and cc[5] > -1:
+
+            fV[11] = cc[0]
+            fV[12] = cc[1]
+            fV[13] = cc[2]
+            fV[14] = cc[3]
+            fV[15] = cc[4]
+            fV[16] = cc[5]
+
+    print(fV)
+
+    fV = check_numbers(fV, matchID, c, firstwrite)
+
+    print(fV)
 
     #Store variables in sqlite database
 

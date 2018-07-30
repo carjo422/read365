@@ -1,6 +1,0 @@
-import pyscreenshot as ImageGrab
-import pytesseract
-
-def OCRscore(cV):
-
-    image_string = pytesseract.image_to_string(ImageGrab.grab(bbox=(cV[0], cV[1], cV[2], cV[3])))
