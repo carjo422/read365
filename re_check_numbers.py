@@ -1,12 +1,12 @@
 from functions import get_all_numbers
 from functions import most_common
 
-def re_check_numbers(input_text,firstwrite,matchID,c,fV,n_iter):
+def re_check_numbers(input_text,firstwrite,matchID,c,fV,n_iter, possession):
     all_numbers = []
 
     # If time is missing
 
-    for i in range(0, 10):
+    for i in range(0, n_iter):
         all_numbers.append(get_all_numbers(input_text[i]))
 
     if firstwrite == 0 and fV[0] == -1:
@@ -21,20 +21,22 @@ def re_check_numbers(input_text,firstwrite,matchID,c,fV,n_iter):
         last_match = 0
         last_within_one = 0
 
-        for i in range(0, 10):
+        for i in range(0, n_iter):
 
-            if all_numbers[i][0] == last_time[0]:
-                last_match += 1
-                last_within_one += 1
-            elif all_numbers[i][0] - last_time[0] < 2:
-                last_within_one += 1
+            if len(all_numbers) > 0 and len(last_time) > 0:
 
-            if last_match > 1:
-                fV[0] = all_numbers[i][0]
-                fV[1] = min(59, last_secs + 7)
-            elif last_within_one > 2:
-                fV[0] = all_numbers[i][0]
-                fV[1] = 0
+                if all_numbers[i][0] == last_time[0]:
+                    last_match += 1
+                    last_within_one += 1
+                elif all_numbers[i][0] - last_time[0] < 2:
+                    last_within_one += 1
+
+                if last_match > 1:
+                    fV[0] = all_numbers[i][0]
+                    fV[1] = min(59, last_secs + 7)
+                elif last_within_one > 2:
+                    fV[0] = all_numbers[i][0]
+                    fV[1] = 0
 
     anums = []
 
@@ -51,22 +53,13 @@ def re_check_numbers(input_text,firstwrite,matchID,c,fV,n_iter):
 
                     if len(text_list[j + 1]) > 10:
                         anums.append(get_all_numbers(text_list[j + 1]))
-                        tot_cells += len(get_all_numbers(text_list[j + 1]))
-                        n+=1
                     elif len(text_list[j + 2]) > 10:
                         anums.append(get_all_numbers(text_list[j + 2]))
-                        tot_cells += len(get_all_numbers(text_list[j + 2]))
-                        n += 1
                     elif len(text_list[j + 3]) > 10:
                         anums.append(get_all_numbers(text_list[j + 3]))
-                        tot_cells += len(get_all_numbers(text_list[j + 3]))
-                        n += 1
                     elif len(text_list[j + 4]) > 10:
                         anums.append(get_all_numbers(text_list[j + 4]))
-                        tot_cells += len(get_all_numbers(text_list[j + 4]))
-                        n += 1
 
-        ave_cells = tot_cells / n
 
         obs1 = []
         obs2 = []
@@ -77,7 +70,7 @@ def re_check_numbers(input_text,firstwrite,matchID,c,fV,n_iter):
 
         # print(ave_cells)
 
-        if ave_cells > 3 and ave_cells < 5.75:
+        if possession == 0:
             for i in range(0, len(anums)):
                 if len(anums[i]) == 4:
                     obs1.append(anums[i][0])
@@ -106,7 +99,7 @@ def re_check_numbers(input_text,firstwrite,matchID,c,fV,n_iter):
                 fV[7] = int(est_pos2)
 
 
-        elif ave_cells >= 5.75:
+        else:
             for i in range(0, len(anums)):
                 if len(anums[i]) == 6:
                     obs1.append(anums[i][0])
@@ -157,7 +150,7 @@ def re_check_numbers(input_text,firstwrite,matchID,c,fV,n_iter):
 
     if fV[10] == -1 or fV[11] == -1 or fV[12] == -1 or fV[13] == -1 or fV[14] == -1 or fV[15] == -1 or fV[16] == -1 or fV[
         17] == -1:
-        for i in range(0, 10):
+        for i in range(0, n_iter):
             text_list = input_text[i].splitlines()
 
             for j in range(0, len(text_list)):

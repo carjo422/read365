@@ -17,7 +17,7 @@ def check_numbers(fV, matchID,c,firstwrite):
         if fV[1] < 0 or fV[1] > 59:
             check_number = 0
 
-        if len(times) > 1:
+        if len(times) > 0:
             if fV[0] < max(mins)[0] and (fV[0] > 55 or fV[0] < 45):
                 check_number = 0
             if fV[0] > max(mins)[0] + 2 and firstwrite == 0:
@@ -43,7 +43,7 @@ def check_numbers(fV, matchID,c,firstwrite):
             if fV[2] + fV[3] + 10 < fV[0] * 0.7:
                 check_number = 0
 
-        if len(att1) > 1:
+        if len(att1) > 0:
             if fV[2] < max(att1)[0]:
                 check_number = 0
             if fV[3] < max(att2)[0]:
@@ -69,7 +69,7 @@ def check_numbers(fV, matchID,c,firstwrite):
             if fV[4] + fV[5] + 10 < fV[0] * 0.4:
                 check_number = 0
 
-        if len(dng1) > 1:
+        if len(dng1) > 0:
             if fV[2] < max(dng1)[0]:
                 check_number = 0
             if fV[3] < max(dng2)[0]:
@@ -107,7 +107,7 @@ def check_numbers(fV, matchID,c,firstwrite):
 
         check_number = 1
 
-        if len(onT1) > 1 and len(onT2) > 1:
+        if len(onT1) > 0 and len(onT2) > 0:
             if fV[8] < max(onT1)[0]:
                 check_number = 0
             if fV[9] < max(onT2)[0]:
@@ -165,7 +165,7 @@ def check_numbers(fV, matchID,c,firstwrite):
 
         check_number = 1
 
-        if len(yel1) > 1 and len(yel2) > 1:
+        if len(yel1) > 0 and len(yel2) > 0:
             if fV[12] < max(yel1)[0]:
                 check_number = 0
             if fV[13] < max(yel2)[0]:
@@ -223,7 +223,7 @@ def check_numbers(fV, matchID,c,firstwrite):
 
         check_number = 1
 
-        if len(corn1) > 1 and len(corn2) > 1:
+        if len(corn1) > 0 and len(corn2) > 0:
             if fV[16] < max(corn1)[0]:
                 check_number = 0
             if fV[17] < max(corn2)[0]:
@@ -249,7 +249,7 @@ def check_numbers(fV, matchID,c,firstwrite):
 
         check_number = 1
 
-        if len(score1) > 1 and len(score2) > 1:
+        if len(score1) > 0 and len(score2) > 0:
             if fV[18] < max(score1)[0]:
                 check_number = 0
             if fV[19] < max(score2)[0]:

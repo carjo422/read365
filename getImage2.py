@@ -6,6 +6,7 @@ import sqlite3
 import time
 from time import sleep
 import numpy as np
+import datetime
 
 from functions import most_common
 from functions import normalize
@@ -19,6 +20,7 @@ from closeOCR import OCRcorner
 from closeOCR import ShotsOn
 from closeOCR import ShotsOff
 from closeOCR import OCRattacks
+from closeOCR import check_possession
 
 from import_base_data import import_base_data
 from check_numbers import check_numbers
@@ -29,13 +31,18 @@ from pynput.mouse import Listener
 global count_input
 global time
 global input_text
+possession = -1
 
 conn = sqlite3.connect('gamedata.db')
 firstwrite = 1
 n_iter = 10
+c = conn.cursor()
 
-#c.execute("""CREATE TABLE footballdata (
+#c.execute("""CREATE TABLE tradedata (
 #                ID integer,
+#                time,
+#                team1,
+#                team2,
 #                odds1 real,
 #                oddsX real,
 #                odds2 real,
@@ -76,10 +83,14 @@ oddsX=float(sys.argv[3])
 odds2=float(sys.argv[4])
 odds25u=float(sys.argv[5])
 odds25o=float(sys.argv[6])
+team1 = sys.argv[7]
+team2 = sys.argv[7]
+
 
 matchID = sys.argv[1]
 odds1X2 = normalize([odds1,oddsX,odds2])
 odds25 = normalize([odds25u, odds25o])
+
 
 ### Get images by selecting part of the screen
 
@@ -91,6 +102,7 @@ def on_click(x,y, button, pressed):
     global c2
     global c3
     global c4
+
 
     count_input += 1
 
@@ -112,9 +124,39 @@ def on_click(x,y, button, pressed):
 with Listener(on_click=on_click) as listener:
         listener.join()  ### Run script X times ###
 
+#not_started = 1
+
+#while not_started == 1:
+
+#    test_string1 = pytesseract.image_to_string(ImageGrab.grab(bbox=(c1, c2, c3, c4)))
+
+#    sleep(4)
+
+#    test_string2 = pytesseract.image_to_string(ImageGrab.grab(bbox=(c1, c2, c3, c4)))
+
+#    if test_string1 != test_string2:
+#        not_started = 0
+
 while 1 > 0:
 
     c = conn.cursor()
+
+    # is possession included?
+    if possession == -1:
+        possession = check_possession([c1, c2, c3, c4])
+        if possession == 1:
+            print("Possession is included")
+        else:
+            print("Possession not included")
+
+    sleep(3)
+
+    if possession == 0:
+        possession = check_possession([c1, c2, c3, c4])
+        if possession == 1:
+            print("Possession is included")
+        else:
+            print("Possession still not included")
 
     if n_iter > 0:
         input_text[0] = pytesseract.image_to_string(ImageGrab.grab(bbox=(c1, c2 + c2 * 0.2, c3, c4 + c2 * 0.2)))
@@ -177,7 +219,7 @@ while 1 > 0:
 
     #All variables checked - Look for numbers to input where missing
 
-    fV = re_check_numbers(input_text, firstwrite, matchID, c, fV, n_iter)
+    fV = re_check_numbers(input_text, firstwrite, matchID, c, fV, n_iter, possession)
 
     print(fV)
 
@@ -217,7 +259,7 @@ while 1 > 0:
 
     #Add possesion and attacks if needed
     if fV[2] == -1 or fV[3] == -1 or fV[4] == -1 or fV[5] == -1 or fV[6] == -1 or fV[7] == -1:
-        ap = OCRattacks([c1, c2, c3, c4])
+        ap = OCRattacks([c1, c2, c3, c4], possession)
         if ap[0] > -1 and ap[1] > -1 and ap[2] > -1 and ap[3] > -1 and ap[4] > -1 and ap[5] > -1:
             fV[2] = ap[0]
             fV[3] = ap[1]
@@ -232,7 +274,7 @@ while 1 > 0:
 
     print(fV)
 
-    OCRattacks([c1, c2, c3, c4])
+    OCRattacks([c1, c2, c3, c4], possession)
 
     #Store variables in sqlite database
 
@@ -243,11 +285,11 @@ while 1 > 0:
     else:
 
         c.execute("""INSERT INTO
-                    footballdata (
-                        ID,odds1,oddsX,odds2,b25,o25,timeMin,timeSec,att1,att2,dng1,dng2,pos1,pos2,onT1,onT2,offT1,offT2,yel1,yel2,red1,red2,corn1,corn2,score1,score2)
+                    tradedata (
+                        ID,time,team1,team2,odds1,oddsX,odds2,b25,o25,timeMin,timeSec,att1,att2,dng1,dng2,pos1,pos2,onT1,onT2,offT1,offT2,yel1,yel2,red1,red2,corn1,corn2,score1,score2)
                     VALUES
-                        (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
-                  (matchID, odds1, oddsX, odds2, odds25u, odds25o, fV[0], fV[1], fV[2], fV[3], fV[4], fV[5], fV[6],
+                        (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
+                  (matchID,datetime.datetime.now(),team1, team2, odds1, oddsX, odds2, odds25u, odds25o, fV[0], fV[1], fV[2], fV[3], fV[4], fV[5], fV[6],
                    fV[7], fV[8], fV[9], fV[10], fV[11], fV[12], fV[13], fV[14], fV[15], fV[16], fV[17], fV[18], fV[19]))
         conn.commit()
         c.close()
