@@ -249,8 +249,44 @@ def check_possession(cV):
 
     possession = 0
 
-
     if "oss" in image_string1 or "ssi" in image_string1 or "ion" in image_string1:
         possession=1
 
     return possession
+
+def get_number(cV,xV,yV):
+    im1 = ImageGrab.grab(bbox=(cV[0] + xV[0], cV[1] + yV[0], cV[0] + xV[1], cV[1] + yV[1]))
+
+    bigimage1 = im1.resize((int((xV[0] - xV[1]) * 2), int((yV[0] - yV[1]) * 2)), Image.NEAREST)
+    bigimage2 = im1.resize((int((xV[0] - xV[1]) * 3), int((yV[0] - yV[1]) * 3)), Image.NEAREST)
+    bigimage3 = im1.resize((int((xV[0] - xV[1]) * 5), int((yV[0] - yV[1]) * 5)), Image.NEAREST)
+
+    image_string1 = pytesseract.image_to_string(bigimage1, config='-psm 7 -c tessedit_char_whitelist=0123456789')
+    image_string2 = pytesseract.image_to_string(bigimage1, config='-psm 7 -c tessedit_char_whitelist=0123456789')
+    image_string3 = pytesseract.image_to_string(bigimage1, config='-psm 7 -c tessedit_char_whitelist=0123456789')
+
+    return int(image_string3)
+
+def get_time(cV):
+
+    xV = [(cV[2] - cV[0]) * 0.55, (cV[2] - cV[0]) * 0.45]
+    yV = [(cV[3] - cV[1]) * 0.22, (cV[3] - cV[1]) * 0.18]
+
+    im1 = ImageGrab.grab(bbox=(cV[0] + xV[0], cV[1] + yV[0], cV[0] + xV[1], cV[1] + yV[1]))
+
+    bigimage1 = im1.resize((int((xV[0] - xV[1]) * 2), int((yV[0] - yV[1]) * 2)), Image.NEAREST)
+    bigimage2 = im1.resize((int((xV[0] - xV[1]) * 3), int((yV[0] - yV[1]) * 3)), Image.NEAREST)
+    bigimage3 = im1.resize((int((xV[0] - xV[1]) * 5), int((yV[0] - yV[1]) * 5)), Image.NEAREST)
+
+    image_string1 = pytesseract.image_to_string(bigimage1, config='-psm 7')
+    image_string2 = pytesseract.image_to_string(bigimage2, config='-psm 7')
+    image_string3 = pytesseract.image_to_string(bigimage3, config='-psm 7')
+
+    print(image_string1)
+    print(image_string2)
+    print(image_string3)
+
+    bigimage1 = bigimage1.convert("RGB")
+    bigimage1.save("f77.jpg", "JPEG")
+
+    return [0,0]
