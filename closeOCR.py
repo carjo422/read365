@@ -3,6 +3,8 @@ import pytesseract
 from PIL import Image
 from functions import isnumber
 from functions import get_all_numbers
+import numpy as np
+from numpy import array
 
 def OCRscore(cV):
 
@@ -18,8 +20,12 @@ def OCRscore(cV):
 
     bigimage1 = im1.resize((int((h2 - h1) * 10), int((v2 - v1) * 10)), Image.NEAREST)
     bigimage2 = im2.resize((int((h4 - h3) * 10), int((v2 - v1) * 10)), Image.NEAREST)
-    #bigimage2 = bigimage1.convert("RGB")
-    #bigimage2.save("test.jpg", "JPEG")
+
+    bigimage1 = bigimage1.convert("RGB")
+    bigimage1.save("pic17.jpg", "JPEG")
+
+    bigimage2 = bigimage2.convert("RGB")
+    bigimage2.save("pic16.jpg", "JPEG")
 
     image_string1 = pytesseract.image_to_string(bigimage1, config='-psm 10 -c tessedit_char_whitelist=0123456789')
     image_string2 = pytesseract.image_to_string(bigimage2, config='-psm 10 -c tessedit_char_whitelist=0123456789')
@@ -254,7 +260,9 @@ def check_possession(cV):
 
     return possession
 
-def get_number(cV,xV,yV):
+
+def get_number(cV,xV,yV,pc):
+
     im1 = ImageGrab.grab(bbox=(cV[0] + xV[0], cV[1] + yV[0], cV[0] + xV[1], cV[1] + yV[1]))
 
     bigimage1 = im1.resize((int((xV[0] - xV[1]) * 2), int((yV[0] - yV[1]) * 2)), Image.NEAREST)
@@ -265,12 +273,26 @@ def get_number(cV,xV,yV):
     image_string2 = pytesseract.image_to_string(bigimage1, config='-psm 7 -c tessedit_char_whitelist=0123456789')
     image_string3 = pytesseract.image_to_string(bigimage1, config='-psm 7 -c tessedit_char_whitelist=0123456789')
 
-    return int(image_string3)
+    nm = -1
+
+    if isnumber(image_string3):
+        nm = int(image_string3)
+    elif isnumber(image_string2):
+        nm = int(image_string2)
+    elif isnumber(image_string1):
+        nm = int(image_string1)
+
+    savestring = "pic" + str(pc) + ".jpg"
+
+    bigimage1 = bigimage1.convert("RGB")
+    bigimage1.save(savestring, "JPEG")
+
+    return nm
 
 def get_time(cV):
 
     xV = [(cV[2] - cV[0]) * 0.55, (cV[2] - cV[0]) * 0.45]
-    yV = [(cV[3] - cV[1]) * 0.22, (cV[3] - cV[1]) * 0.18]
+    yV = [(cV[3] - cV[1]) * 0.215, (cV[3] - cV[1]) * 0.185]
 
     im1 = ImageGrab.grab(bbox=(cV[0] + xV[0], cV[1] + yV[0], cV[0] + xV[1], cV[1] + yV[1]))
 
@@ -282,11 +304,64 @@ def get_time(cV):
     image_string2 = pytesseract.image_to_string(bigimage2, config='-psm 7')
     image_string3 = pytesseract.image_to_string(bigimage3, config='-psm 7')
 
-    print(image_string1)
-    print(image_string2)
-    print(image_string3)
-
     bigimage1 = bigimage1.convert("RGB")
-    bigimage1.save("f77.jpg", "JPEG")
+    bigimage1.save("pic1.jpg", "JPEG")
 
-    return [0,0]
+    [min1, min2, min3] = ["-1","-1","-1"]
+
+    if ":" in image_string1:
+        i = image_string1.index(':')
+
+        min1 = image_string1[0:i]
+        sec1 = image_string1[i+1:len(image_string1)+1]
+
+    if ":" in image_string2:
+        i = image_string2.index(':')
+
+        min2 = image_string2[0:i]
+        sec2 = image_string2[i + 1:len(image_string2) + 1]
+
+    if ":" in image_string3:
+        i = image_string3.index(':')
+
+        min3 = image_string3[0:i]
+        sec3 = image_string3[i + 1:len(image_string3) + 1]
+
+    min = -1
+    sec = -1
+
+    if min1 == min2 and min2 == min3:
+        if isnumber(min1):
+            min = int(min1)
+    elif min1 == min2:
+        if isnumber(min1):
+            min = int(min1)
+    elif min1 == min3:
+        if isnumber(min1):
+            min = int(min1)
+    elif min2 == min3:
+        if isnumber(min2):
+            min = int(min2)
+
+    if min > -1:
+        if sec1 == sec2 and sec2 == sec3:
+            if isnumber(sec1):
+                sec = int(sec1)
+        elif sec1 == sec2:
+            if isnumber(sec1):
+                sec = int(sec1)
+        elif sec1 == sec3:
+            if isnumber(sec1):
+                sec = int(sec1)
+        elif sec2 == sec3:
+            if isnumber(sec1):
+                sec = int(sec2)
+        else:
+            if isnumber(sec1):
+                sec = int(sec1)
+            elif isnumber(sec2):
+                sec = int(sec2)
+            elif isnumber(sec3):
+                sec = int(sec3)
+
+    return [min,sec]

@@ -85,7 +85,8 @@ odds2=float(sys.argv[4])
 odds25u=float(sys.argv[5])
 odds25o=float(sys.argv[6])
 team1 = sys.argv[7]
-team2 = sys.argv[7]
+team2 = sys.argv[8]
+betting_live = sys.argv[9]
 
 
 matchID = sys.argv[1]
@@ -125,6 +126,8 @@ def on_click(x,y, button, pressed):
 with Listener(on_click=on_click) as listener:
         listener.join()  ### Run script X times ###
 
+global pc
+
 while 1 > 0:
 
     c = conn.cursor()
@@ -141,35 +144,42 @@ while 1 > 0:
     fV[1] = sec
 
     #Attack, Dangerous, Possession
-    fV[2] = get_number([c1, c2, c3, c4], [(c3 - c1) * 0.12, (c3 - c1) * 0.02], [(c4 - c2) * 0.80, (c4 - c2) * 0.75])
-    fV[3] = get_number([c1, c2, c3, c4], [(c3 - c1) * 0.30, (c3 - c1) * 0.22], [(c4 - c2) * 0.80, (c4 - c2) * 0.75])
-    fV[4] = get_number([c1, c2, c3, c4], [(c3 - c1) * 0.45, (c3 - c1) * 0.30], [(c4 - c2) * 0.80, (c4 - c2) * 0.75])
-    fV[5] = get_number([c1, c2, c3, c4], [(c3 - c1) * 0.70, (c3 - c1) * 0.55], [(c4 - c2) * 0.80, (c4 - c2) * 0.75])
-    fV[6] = get_number([c1, c2, c3, c4], [(c3 - c1) * 0.78, (c3 - c1) * 0.70], [(c4 - c2) * 0.80, (c4 - c2) * 0.75])
-    fV[7] = get_number([c1, c2, c3, c4], [(c3 - c1) * 0.98, (c3 - c1) * 0.88], [(c4 - c2) * 0.80, (c4 - c2) * 0.75])
+    fV[2] = get_number([c1, c2, c3, c4], [(c3 - c1) * 0.12, (c3 - c1) * 0.02], [(c4 - c2) * 0.80, (c4 - c2) * 0.75],2)
+    fV[3] = get_number([c1, c2, c3, c4], [(c3 - c1) * 0.30, (c3 - c1) * 0.22], [(c4 - c2) * 0.80, (c4 - c2) * 0.75],3)
+    fV[4] = get_number([c1, c2, c3, c4], [(c3 - c1) * 0.45, (c3 - c1) * 0.30], [(c4 - c2) * 0.80, (c4 - c2) * 0.75],4)
+    fV[5] = get_number([c1, c2, c3, c4], [(c3 - c1) * 0.70, (c3 - c1) * 0.55], [(c4 - c2) * 0.80, (c4 - c2) * 0.75],5)
+    fV[6] = get_number([c1, c2, c3, c4], [(c3 - c1) * 0.78, (c3 - c1) * 0.70], [(c4 - c2) * 0.80, (c4 - c2) * 0.75],6)
+    fV[7] = get_number([c1, c2, c3, c4], [(c3 - c1) * 0.98, (c3 - c1) * 0.88], [(c4 - c2) * 0.80, (c4 - c2) * 0.75],7)
 
     #Corners, cards
-    fV[16] = get_number([c1, c2, c3, c4], [(c3 - c1) * 0.12, (c3 - c1) * 0.02], [(c4 - c2) * 0.95, (c4 - c2) * 0.91])
-    fV[14] = get_number([c1, c2, c3, c4], [(c3 - c1) * 0.19, (c3 - c1) * 0.12], [(c4 - c2) * 0.95, (c4 - c2) * 0.91])
-    fV[12] = get_number([c1, c2, c3, c4], [(c3 - c1) * 0.26, (c3 - c1) * 0.19], [(c4 - c2) * 0.95, (c4 - c2) * 0.91])
-    fV[17] = get_number([c1, c2, c3, c4], [(c3 - c1) * 0.98, (c3 - c1) * 0.88], [(c4 - c2) * 0.95, (c4 - c2) * 0.91])
-    fV[15] = get_number([c1, c2, c3, c4], [(c3 - c1) * 0.88, (c3 - c1) * 0.81], [(c4 - c2) * 0.95, (c4 - c2) * 0.91])
-    fV[13] = get_number([c1, c2, c3, c4], [(c3 - c1) * 0.81, (c3 - c1) * 0.74], [(c4 - c2) * 0.95, (c4 - c2) * 0.91])
+    fV[16] = get_number([c1, c2, c3, c4], [(c3 - c1) * 0.12, (c3 - c1) * 0.02], [(c4 - c2) * 0.95, (c4 - c2) * 0.91],16)
+    fV[14] = get_number([c1, c2, c3, c4], [(c3 - c1) * 0.19, (c3 - c1) * 0.12], [(c4 - c2) * 0.95, (c4 - c2) * 0.91],14)
+    fV[12] = get_number([c1, c2, c3, c4], [(c3 - c1) * 0.26, (c3 - c1) * 0.19], [(c4 - c2) * 0.95, (c4 - c2) * 0.91],12)
+    fV[17] = get_number([c1, c2, c3, c4], [(c3 - c1) * 0.98, (c3 - c1) * 0.88], [(c4 - c2) * 0.95, (c4 - c2) * 0.91],17)
+    fV[15] = get_number([c1, c2, c3, c4], [(c3 - c1) * 0.88, (c3 - c1) * 0.81], [(c4 - c2) * 0.95, (c4 - c2) * 0.91],15)
+    fV[13] = get_number([c1, c2, c3, c4], [(c3 - c1) * 0.81, (c3 - c1) * 0.74], [(c4 - c2) * 0.95, (c4 - c2) * 0.91],13)
 
     #Shots
-    fV[8] = get_number([c1, c2, c3, c4], [(c3 - c1) * 0.35, (c3 - c1) * 0.26], [(c4 - c2) * 0.91, (c4 - c2) * 0.86])
-    fV[9] = get_number([c1, c2, c3, c4], [(c3 - c1) * 0.74, (c3 - c1) * 0.65], [(c4 - c2) * 0.91, (c4 - c2) * 0.86])
-    fV[10] = get_number([c1, c2, c3, c4], [(c3 - c1) * 0.35, (c3 - c1) * 0.26], [(c4 - c2) * 0.97, (c4 - c2) * 0.91])
-    fV[11] = get_number([c1, c2, c3, c4], [(c3 - c1) * 0.74, (c3 - c1) * 0.65], [(c4 - c2) * 0.97, (c4 - c2) * 0.91])
+    fV[8] = get_number([c1, c2, c3, c4], [(c3 - c1) * 0.33, (c3 - c1) * 0.26], [(c4 - c2) * 0.91, (c4 - c2) * 0.86],8)
+    fV[9] = get_number([c1, c2, c3, c4], [(c3 - c1) * 0.74, (c3 - c1) * 0.67], [(c4 - c2) * 0.91, (c4 - c2) * 0.86],9)
+    fV[10] = get_number([c1, c2, c3, c4], [(c3 - c1) * 0.33, (c3 - c1) * 0.26], [(c4 - c2) * 0.97, (c4 - c2) * 0.91],10)
+    fV[11] = get_number([c1, c2, c3, c4], [(c3 - c1) * 0.74, (c3 - c1) * 0.67], [(c4 - c2) * 0.97, (c4 - c2) * 0.91],11)
+
+    #Score
+    [fV[18],fV[19]] = OCRscore([c1, c2, c3, c4])
 
     print(fV)
 
     #Store variables in sqlite database
 
+    tt = 0
 
-    if -1 in fV:
+    if -1 in fV == True:
         print("Unsuccesful save of data")
-        n_iter = 10
+        tt = 3
+    elif fV[0] == 0 and fV[1] == 0:
+        print("Game hasn't started")
+        tt = 5
     else:
 
         c.execute("""INSERT INTO
@@ -185,12 +195,10 @@ while 1 > 0:
 
         print("Succesful save to database")
 
-        if n_iter > 5:
-            n_iter -= 2
-        elif n_iter > 2:
-            n_iter -=1
-        else:
-            pass
+        tt = 8
 
-    sleep(20-n_iter*2)
 
+    sleep(tt)
+
+    if betting_live == 1:
+        print("You are betting live man")

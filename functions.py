@@ -492,4 +492,3 @@ def isnumber(s):
         return True
     except ValueError:
         return False
-
