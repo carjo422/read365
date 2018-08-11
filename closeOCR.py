@@ -307,7 +307,8 @@ def get_time(cV):
     bigimage1 = bigimage1.convert("RGB")
     bigimage1.save("pic1n.jpg", "JPEG")
 
-    [min1, min2, min3] = ["-1","-1","-1"]
+    [min1, min2, min3] = ["-1", "-1", "-1"]
+    [sec1, sec2, sec3] = ["-1", "-1", "-1"]
 
     if ":" in image_string1:
         i = image_string1.index(':')
