@@ -8,12 +8,12 @@ from numpy import array
 
 def OCRscore(cV):
 
-    h1 = (cV[2] - cV[0]) * 0.435
-    h2 = (cV[2] - cV[0]) * 0.49
-    h3 = (cV[2] - cV[0]) * 0.51
-    h4 = (cV[2] - cV[0]) * 0.565
-    v1 = (cV[3] - cV[1]) * 0.11
-    v2 = (cV[3] - cV[1]) * 0.155
+    h1 = (cV[2] - cV[0]) * 0.715
+    h2 = (cV[2] - cV[0]) * 0.74
+    h3 = (cV[2] - cV[0]) * 0.75
+    h4 = (cV[2] - cV[0]) * 0.775
+    v1 = (cV[3] - cV[1]) * 0.21
+    v2 = (cV[3] - cV[1]) * 0.295
 
     im1 = ImageGrab.grab(bbox=(cV[0] + h1, cV[1] + v1, cV[0] + h2, cV[1] + v2))
     im2 = ImageGrab.grab(bbox=(cV[0] + h3, cV[1] + v1, cV[0] + h4, cV[1] + v2))
@@ -22,10 +22,10 @@ def OCRscore(cV):
     bigimage2 = im2.resize((int((h4 - h3) * 10), int((v2 - v1) * 10)), Image.NEAREST)
 
     bigimage1 = bigimage1.convert("RGB")
-    bigimage1.save("pic17.jpg", "JPEG")
+    bigimage1.save("pic17n.jpg", "JPEG")
 
     bigimage2 = bigimage2.convert("RGB")
-    bigimage2.save("pic16.jpg", "JPEG")
+    bigimage2.save("pic16n.jpg", "JPEG")
 
     image_string1 = pytesseract.image_to_string(bigimage1, config='-psm 10 -c tessedit_char_whitelist=0123456789')
     image_string2 = pytesseract.image_to_string(bigimage2, config='-psm 10 -c tessedit_char_whitelist=0123456789')
@@ -291,8 +291,8 @@ def get_number(cV,xV,yV,pc):
 
 def get_time(cV):
 
-    xV = [(cV[2] - cV[0]) * 0.55, (cV[2] - cV[0]) * 0.45]
-    yV = [(cV[3] - cV[1]) * 0.215, (cV[3] - cV[1]) * 0.185]
+    xV = [(cV[2] - cV[0]) * 0.27, (cV[2] - cV[0]) * 0.22]
+    yV = [(cV[3] - cV[1]) * 0.30, (cV[3] - cV[1]) * 0.245]
 
     im1 = ImageGrab.grab(bbox=(cV[0] + xV[0], cV[1] + yV[0], cV[0] + xV[1], cV[1] + yV[1]))
 
@@ -305,7 +305,7 @@ def get_time(cV):
     image_string3 = pytesseract.image_to_string(bigimage3, config='-psm 7')
 
     bigimage1 = bigimage1.convert("RGB")
-    bigimage1.save("pic1.jpg", "JPEG")
+    bigimage1.save("pic1n.jpg", "JPEG")
 
     [min1, min2, min3] = ["-1","-1","-1"]
 
