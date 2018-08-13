@@ -3,6 +3,7 @@ import pytesseract
 from PIL import Image
 from functions import isnumber
 from functions import get_all_numbers
+from check_numbers import test_number
 import numpy as np
 from numpy import array
 
@@ -261,31 +262,67 @@ def check_possession(cV):
     return possession
 
 
-def get_number(cV,xV,yV,pc):
+def get_number(cV,xV,yV,pc,c,min,matchID):
 
-    im1 = ImageGrab.grab(bbox=(cV[0] + xV[0], cV[1] + yV[0], cV[0] + xV[1], cV[1] + yV[1]))
+    def test_coords(x_diff):
+        im1 = ImageGrab.grab(bbox=(cV[0] + xV[0]+x_diff, cV[1] + yV[0], cV[0] + xV[1]+x_diff, cV[1] + yV[1]))
 
-    bigimage1 = im1.resize((int((xV[0] - xV[1]) * 2), int((yV[0] - yV[1]) * 2)), Image.NEAREST)
-    bigimage2 = im1.resize((int((xV[0] - xV[1]) * 3), int((yV[0] - yV[1]) * 3)), Image.NEAREST)
-    bigimage3 = im1.resize((int((xV[0] - xV[1]) * 5), int((yV[0] - yV[1]) * 5)), Image.NEAREST)
+        bigimage1 = im1.resize((int((xV[0] - xV[1]) * 2), int((yV[0] - yV[1]) * 2)), Image.NEAREST)
+        bigimage2 = im1.resize((int((xV[0] - xV[1]) * 3), int((yV[0] - yV[1]) * 3)), Image.NEAREST)
+        bigimage3 = im1.resize((int((xV[0] - xV[1]) * 5), int((yV[0] - yV[1]) * 5)), Image.NEAREST)
 
-    image_string1 = pytesseract.image_to_string(bigimage1, config='-psm 7 -c tessedit_char_whitelist=0123456789')
-    image_string2 = pytesseract.image_to_string(bigimage1, config='-psm 7 -c tessedit_char_whitelist=0123456789')
-    image_string3 = pytesseract.image_to_string(bigimage1, config='-psm 7 -c tessedit_char_whitelist=0123456789')
+        image_string1 = pytesseract.image_to_string(bigimage1, config='-psm 7 -c tessedit_char_whitelist=0123456789')
+        image_string2 = pytesseract.image_to_string(bigimage2, config='-psm 7 -c tessedit_char_whitelist=0123456789')
+        image_string3 = pytesseract.image_to_string(bigimage3, config='-psm 7 -c tessedit_char_whitelist=0123456789')
 
-    nm = -1
+        nm = -1
 
-    if isnumber(image_string3):
-        nm = int(image_string3)
-    elif isnumber(image_string2):
-        nm = int(image_string2)
-    elif isnumber(image_string1):
-        nm = int(image_string1)
+        if isnumber(image_string3):
+            nm = int(image_string3)
+        elif isnumber(image_string2):
+            nm = int(image_string2)
+        elif isnumber(image_string1):
+            nm = int(image_string1)
 
-    savestring = "pic" + str(pc) + ".jpg"
+        savestring = "pic" + str(pc) + ".jpg"
 
-    bigimage1 = bigimage1.convert("RGB")
-    bigimage1.save(savestring, "JPEG")
+        bigimage1 = bigimage1.convert("RGB")
+        bigimage1.save(savestring, "JPEG")
+
+        nm = test_number(nm,pc,min,c,matchID)
+
+        return nm
+
+    nm = test_coords(0)
+
+    #if nm > -1:
+    #    pass
+    #else:
+    #    nm = test_coords(0.01)
+    #    if nm > -1:
+    #        pass
+    #    else:
+    #        nm = test_coords(-0.01)
+    #        if nm > -1:
+    #            pass
+    #        else:
+    #            nm = test_coords(-0.01)
+    #            if nm > -1:
+    #                pass
+    #            else:
+    #                nm = test_coords(0.02)
+    #                if nm > -1:
+    #                    pass
+    #                else:
+    #                    nm = test_coords(-0.02)
+    #                    if nm > -1:
+    #                        pass
+    #                    else:
+    #                        nm = test_coords(0.03)
+    #                        if nm > -1:
+    #                            pass
+    #                        else:
+    #                            nm = test_coords(-0.03)
 
     return nm
 
@@ -304,11 +341,12 @@ def get_time(cV):
     image_string2 = pytesseract.image_to_string(bigimage2, config='-psm 7')
     image_string3 = pytesseract.image_to_string(bigimage3, config='-psm 7')
 
-    bigimage1 = bigimage1.convert("RGB")
-    bigimage1.save("pic1n.jpg", "JPEG")
+    bigimage3 = bigimage3.convert("RGB")
+    bigimage3.save("pic1n.jpg", "JPEG")
 
     [min1, min2, min3] = ["-1", "-1", "-1"]
     [sec1, sec2, sec3] = ["-1", "-1", "-1"]
+
 
     if ":" in image_string1:
         i = image_string1.index(':')
@@ -316,17 +354,31 @@ def get_time(cV):
         min1 = image_string1[0:i]
         sec1 = image_string1[i+1:len(image_string1)+1]
 
+    elif len(image_string1) == 5:
+        min1 = image_string1[0:2]
+        sec1 = image_string1[3:5]
+
+
     if ":" in image_string2:
         i = image_string2.index(':')
 
         min2 = image_string2[0:i]
         sec2 = image_string2[i + 1:len(image_string2) + 1]
 
+    elif len(image_string2) == 5:
+        min2 = image_string2[0:2]
+        sec2 = image_string2[3:5]
+
+
     if ":" in image_string3:
         i = image_string3.index(':')
 
         min3 = image_string3[0:i]
         sec3 = image_string3[i + 1:len(image_string3) + 1]
+
+    elif len(image_string3) == 5:
+        min3 = image_string3[0:2]
+        sec3 = image_string3[3:5]
 
     min = -1
     sec = -1
@@ -355,7 +407,7 @@ def get_time(cV):
             if isnumber(sec1):
                 sec = int(sec1)
         elif sec2 == sec3:
-            if isnumber(sec1):
+            if isnumber(sec2):
                 sec = int(sec2)
         else:
             if isnumber(sec1):

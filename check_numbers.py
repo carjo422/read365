@@ -1,296 +1,135 @@
 from functions import isnumber
 import datetime
 
-def check_numbers(fV, matchID,c,firstwrite):
+def check_time(pre_val, pre_sec, start_time, start_min, c, matchID):
 
-    # Check if time makes sense
-    if isnumber(fV[0]) and isnumber(fV[1]):
-        c.execute("SELECT timeMin*100+timeSec as times FROM tradedata where ID = ?", [str(matchID)])
-        times = c.fetchall()
-        c.execute("SELECT timeMin as mins FROM tradedata where ID = ?", [str(matchID)])
-        mins = c.fetchall()
+    if isnumber(pre_val):
+
+        mins = []
+
         c.execute("SELECT time as dayTime FROM tradedata where ID = ?", [str(matchID)])
         dayTime = c.fetchall()
+        if len(dayTime) > 0:
+            currTime = max(dayTime)[0]
+            c.execute("SELECT timeMin as times FROM tradedata where ID = ? and time = ?", [str(matchID),currTime])
+            mins = c.fetchall()
+
+        if len(mins) > 0:
+            start_time = str(max(dayTime)[0])
+            start_min = max(mins)[0]
 
         check_number = 1
 
         # Check if time numbers are reasonable
-        if fV[0] < 0 or fV[0] > 100:
-            check_number = 0
-        if fV[1] < 0 or fV[1] > 59:
+        if pre_val < 0 or pre_val > 120:
             check_number = 0
 
-        if len(times) > 0:
-            if fV[0] < max(mins)[0] and (fV[0] > 55 or fV[0] < 45):
-                check_number = 0
-            if fV[0] > max(mins)[0] + 2 and firstwrite == 0:
-                check_number = 0
-
-        if len(dayTime) > 0:
-
-            d1 = datetime.datetime.strptime(min(dayTime)[0][0:19], '%Y-%m-%d %H:%M:%S')
-            d2 = datetime.datetime.strptime(str(datetime.datetime.now())[0:19], '%Y-%m-%d %H:%M:%S')
-
-            diff = (d2 - d1).total_seconds() / 60
-            exp_min = diff+min(mins)[0]
-
-            if exp_min < 60:
-                if fV[0] < exp_min:
-                    fV[0] = -1
-                elif fV[0] > exp_min + 5:
-                    fV[0] = -1
-            elif exp_min >= 60:
-                exp_min -= 15
-                if fV[0] < exp_min-15:
-                    fV[0] = -1
-                elif fV[0] > exp_min + 5:
-                    fV[0] = -1
-
-        if check_number == 0:
-            fV[0] = -1
-            fV[1] = -1
-
-    if 1 == 2:
-
-        # Check if attacks makes sense
-        if isnumber(fV[2]) & isnumber(fV[3]):
-
-            c.execute("SELECT att1 as mins FROM footballdata where ID = ?", [str(matchID)])
-            att1 = c.fetchall()
-            c.execute("SELECT att2 as mins FROM footballdata where ID = ?", [str(matchID)])
-            att2 = c.fetchall()
-
-            check_number = 1
-
-            if fV[0] >= 0:
-                if fV[2] > fV[0] * 3 + 20 or fV[3] > fV[0] * 3 + 20:
-                    check_number = 0
-                if fV[2] + fV[3] + 10 < fV[0] * 0.7:
-                    check_number = 0
-
-            if len(att1) > 0:
-                if fV[2] < max(att1)[0]:
-                    check_number = 0
-                if fV[3] < max(att2)[0]:
-                    check_number = 0
-
-            if check_number == 0:
-                fV[2] = -1
-                fV[3] = -1
-
-        # Check if dangerous attacks makes sense
-        if isnumber(fV[4]) & isnumber(fV[5]):
-
-            c.execute("SELECT dng1 as mins FROM footballdata where ID = ?", [str(matchID)])
-            dng1 = c.fetchall()
-            c.execute("SELECT dng2 as mins FROM footballdata where ID = ?", [str(matchID)])
-            dng2 = c.fetchall()
-
-            check_number = 1
-
-            if fV[0] >= 0:
-                if fV[4] > fV[0] * 2 + 20 or fV[5] > fV[0] * 2 + 20:
-                    check_number = 0
-                if fV[4] + fV[5] + 10 < fV[0] * 0.4:
-                    check_number = 0
-
-            if len(dng1) > 0:
-                if fV[2] < max(dng1)[0]:
-                    check_number = 0
-                if fV[3] < max(dng2)[0]:
-                    check_number = 0
-
-            if fV[2] > 0 & fV[3] > 0:
-                if fV[4] > fV[2]:
-                    check_number = 0
-                if fV[5] > fV[3]:
-                    check_number = 0
-
-            if check_number == 0:
-                fV[4] = -1
-                fV[5] = -1
-
-        # Check if possesion makes sense
-        if isnumber(fV[6]) & isnumber(fV[7]):
-
-            check_number = 1
-
-            if fV[6] + fV[7] != 100:
-                check_number = 0
-
-            if check_number == 0:
-                fV[6] = -1
-                fV[7] = -1
-
-        # Check if shots on target makes sense
-        if isnumber(fV[8]) & isnumber(fV[9]):
-
-            c.execute("SELECT onT1 as mins FROM footballdata where ID = ?", [str(matchID)])
-            onT1 = c.fetchall()
-            c.execute("SELECT onT2 as mins FROM footballdata where ID = ?", [str(matchID)])
-            onT2 = c.fetchall()
-
-            check_number = 1
-
-            if len(onT1) > 0 and len(onT2) > 0:
-                if fV[8] < max(onT1)[0]:
-                    check_number = 0
-                if fV[9] < max(onT2)[0]:
-                    check_number = 0
-
-                    if fV[0] > 0:
-                        if (fV[8] - max(onT1)[0]) > (fV[0] - max(mins)[0]) + 2:
-                            check_number = 0
-                        if (fV[9] - max(onT2)[0]) > (fV[0] - max(mins)[0]) + 2:
-                            check_number = 0
-
-            if fV[8] > fV[0] / 3 + 5 or fV[9] > fV[0] / 3 + 5:
-                check_number = 0
-
-            if check_number == 0:
-                fV[8] = -1
-                fV[9] = -1
-
-        # Check if shots off target makes sense
-        if isnumber(fV[10]) & isnumber(fV[11]):
-
-            c.execute("SELECT offT1 as mins FROM footballdata where ID = ?", [str(matchID)])
-            offT1 = c.fetchall()
-            c.execute("SELECT offT2 as mins FROM footballdata where ID = ?", [str(matchID)])
-            offT2 = c.fetchall()
-
-            check_number = 1
-
-            if len(offT1) > 1 and len(offT2) > 1:
-                if fV[10] < max(offT1)[0]:
-                    check_number = 0
-                if fV[11] < max(offT2)[0]:
-                    check_number = 0
-
-                if fV[0] > 0:
-                    if (fV[10] - max(offT1)[0]) > (fV[0] - max(mins)[0]) + 2:
-                        check_number = 0
-                    if (fV[11] - max(offT2)[0]) > (fV[0] - max(mins)[0]) + 2:
-                        check_number = 0
-
-            if fV[10] > fV[0] / 3 + 5 or fV[11] > fV[0] / 3 + 5:
-                check_number = 0
-
-            if check_number == 0:
-                fV[10] = -1
-                fV[11] = -1
-
-        # Check if yellow cards makes sense
-        if isnumber(fV[12]) & isnumber(fV[13]):
-
-            c.execute("SELECT yel1 as mins FROM footballdata where ID = ?", [str(matchID)])
-            yel1 = c.fetchall()
-            c.execute("SELECT yel2 as mins FROM footballdata where ID = ?", [str(matchID)])
-            yel2 = c.fetchall()
-
-            check_number = 1
-
-            if len(yel1) > 0 and len(yel2) > 0:
-                if fV[12] < max(yel1)[0]:
-                    check_number = 0
-                if fV[13] < max(yel2)[0]:
-                    check_number = 0
-
-                if fV[0] > 0:
-                    if (fV[12] - max(yel1)[0]) > (fV[0] - max(mins)[0]) / 10 + 3:
-                        check_number = 0
-                    if (fV[13] - max(yel2)[0]) > (fV[0] - max(mins)[0]) / 10 + 3:
-                        check_number = 0
-
-                if fV[12] > 10 or fV[13] > 10:
-                    check_number = 0
-
-            if check_number == 0:
-                fV[12] = -1
-                fV[13] = -1
-
-        # Check if red cards makes sense
-        if isnumber(fV[14]) & isnumber(fV[15]):
-
-            c.execute("SELECT red1 as mins FROM footballdata where ID = ?", [str(matchID)])
-            red1 = c.fetchall()
-            c.execute("SELECT red2 as mins FROM footballdata where ID = ?", [str(matchID)])
-            red2 = c.fetchall()
-
-            check_number = 1
-
-            if len(red1) > 1 and len(red2) > 1:
-                if fV[14] < max(red1)[0]:
-                    check_number = 0
-                if fV[15] < max(red2)[0]:
-                    check_number = 0
-
-                if fV[0] > 0:
-                    if (fV[14] - max(red1)[0]) > (fV[0] - max(mins)[0]) / 10 + 3:
-                        check_number = 0
-                    if (fV[15] - max(red2)[0]) > (fV[0] - max(mins)[0]) / 10 + 3:
-                        check_number = 0
-
-                if fV[14] > 4 or fV[15] > 4:
-                    check_number = 0
-
-            if check_number == 0:
-                fV[14] = -1
-                fV[15] = -1
-
-        # Check if corners makes sense
-        if isnumber(fV[16]) & isnumber(fV[17]):
-
-            c.execute("SELECT corn1 as mins FROM footballdata where ID = ?", [str(matchID)])
-            corn1 = c.fetchall()
-            c.execute("SELECT corn2 as mins FROM footballdata where ID = ?", [str(matchID)])
-            corn2 = c.fetchall()
-
-            check_number = 1
-
-            if len(corn1) > 0 and len(corn2) > 0:
-                if fV[16] < max(corn1)[0]:
-                    check_number = 0
-                if fV[17] < max(corn2)[0]:
-                    check_number = 0
-
-                if fV[0] > 0:
-                    if (fV[16] - max(corn1)[0]) > (fV[0] - max(mins)[0]) / 10 + 3:
-                        check_number = 0
-                    if (fV[17] - max(corn2)[0]) > (fV[0] - max(mins)[0]) / 10 + 3:
-                        check_number = 0
-
-            if check_number == 0:
-                fV[14] = -1
-                fV[15] = -1
-
-        # Check if score makes sense
-        if isnumber(fV[18]) & isnumber(fV[19]):
-
-            c.execute("SELECT score1 as mins FROM footballdata where ID = ?", [str(matchID)])
-            score1 = c.fetchall()
-            c.execute("SELECT score2 as mins FROM footballdata where ID = ?", [str(matchID)])
-            score2 = c.fetchall()
-
-            check_number = 1
-
-            if len(score1) > 0 and len(score2) > 0:
-                if fV[18] < max(score1)[0]:
-                    check_number = 0
-                if fV[19] < max(score2)[0]:
-                    check_number = 0
-
-                if fV[0] > 0:
-                    if (fV[18] - max(score1)[0]) > (fV[0] - max(mins)[0]) / 20 + 2:
-                        check_number = 0
-                    if (fV[19] - max(score2)[0]) > (fV[0] - max(mins)[0]) / 20 + 2:
-                        check_number = 0
-
-            if fV[18] > 20 or fV[19] > 20:
-                check_number = 0
-
-            if check_number == 0:
-                fV[18] = -1
-                fV[19] = -1
-
-    return fV
+        d1 = datetime.datetime.strptime((start_time)[0:19], '%Y-%m-%d %H:%M:%S')
+        d2 = datetime.datetime.strptime(str(datetime.datetime.now())[0:19], '%Y-%m-%d %H:%M:%S')
+
+        diff = (d2 - d1).total_seconds() / 60
+        exp_min = start_min + diff
+
+        if len(mins) == 0 and pre_val in [0,1]:
+            exp_min = 0
+
+        if pre_val == 45 and pre_sec == 0:
+            if start_min > 45:
+                pass
+        else:
+            if abs(exp_min - pre_val) > 2:
+                pre_val = -1
+            else:
+                print("Expected time " + str(round(exp_min, 1)) + " actual " + str(pre_val) + " time accepted")
+
+    return pre_val
+
+def test_number(nm,pc,min,c,matchID):
+
+    val = 0
+
+    t=0
+    r=0
+
+    pc_vect = [2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17]
+    var_vect = ["att1","att2","dng1","dng2","blank","blank","onT1","onT2","offT1","offT2","yel1","yel2","red1","red2","corn1","corn2"]
+    t_vect = [1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0]
+    r_vect = [10,10,6,6,100,100,2,2,2,2,4,4,2,2,3,3]
+
+    name = ""
+
+    for i in range(0,len(pc_vect)):
+
+        if pc == pc_vect[i]:
+
+            name = var_vect[i]
+            met = []
+
+            if name != "blank":
+                ex_string = "SELECT " + var_vect[i] + " as " + var_vect[i] + " FROM tradedata where ID = " + str(matchID) + " and timeMin > " + str(min-4) + " and " + var_vect[i] + " > -1"
+
+                c.execute(ex_string)
+                met = c.fetchall()
+
+            if len(met) > 0:
+
+                a=0
+                for j in range(0,len(met)):
+                    a += met[j][0]
+
+                b = len(met)
+
+                val = float(a)/b
+
+            else:
+                val = 0
+
+            t = t_vect[i]
+            r = r_vect[i]
+
+    c.execute("SELECT timeMin as timeMin FROM tradedata where ID = ?", [str(matchID)])
+    minl = c.fetchall()
+
+    print("t is " + str(t))
+
+    if len(minl) > 0:
+        min_last = max(minl)[0]
+    else:
+        min_last = 0
+
+    min_diff = min - min_last
+
+    if val > 0:
+        if nm >= val-1 and nm <= val+t*min_diff+r:
+            pass
+        else:
+            print("Value is incorrect. Min val is " + str(val - 1) + ". Max val is " + str(val + t * min_diff + r) + ". Real val is " + str(nm))
+            print("Expected value for " + name + " was " + val + "")
+            nm = -1
+    else:
+        if nm <= min*t+r and nm >= min*t-r:
+            pass
+        else:
+            print("Value is incorrect. Min val is " + str(min*t-r) + ". Max val is " + str(min*t+r) + ". Real val is " + str(nm))
+            print("Expected value for " + name + " was " + str(val) + "")
+            nm = -1
+
+    return nm
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
