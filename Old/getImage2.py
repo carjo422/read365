@@ -1,32 +1,23 @@
-import os.path
+import datetime
+import sqlite3
+from time import sleep
 
 import pyscreenshot as ImageGrab
 import pytesseract
-import sqlite3
-import time
-from time import sleep
-import numpy as np
-import datetime
+from pynput.mouse import Listener
 
+from Old.import_base_data import import_base_data
+from Old.re_check_numbers import re_check_numbers
+from check_numbers import check_numbers
+from closeOCR import OCRattacks
+from closeOCR import OCRcorner
+from closeOCR import OCRscore
+from closeOCR import ShotsOff
+from closeOCR import ShotsOn
+from closeOCR import check_possession
+from functions import isnumber
 from functions import most_common
 from functions import normalize
-from functions import contains
-from functions import isnumber
-from functions import get_isolated_number
-from functions import get_all_numbers
-
-from closeOCR import OCRscore
-from closeOCR import OCRcorner
-from closeOCR import ShotsOn
-from closeOCR import ShotsOff
-from closeOCR import OCRattacks
-from closeOCR import check_possession
-
-from import_base_data import import_base_data
-from check_numbers import check_numbers
-from re_check_numbers import re_check_numbers
-
-from pynput.mouse import Listener
 
 global count_input
 global time
