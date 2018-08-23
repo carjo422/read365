@@ -6,6 +6,7 @@ from pynput.mouse import Listener
 
 from check_numbers import check_time
 from closeOCR import OCRscore
+from closeOCR import OCRattacks
 from closeOCR import get_number
 from closeOCR import get_time
 from functions import normalize
@@ -162,6 +163,11 @@ while 1 > 0:
     [fV[18],fV[19]] = OCRscore([c1, c2, c3, c4])
 
     print(fV)
+
+    #print("Vad får man på get attacks")
+
+    #ap = OCRattacks([c1, c2, c3, c4], 1)
+    #print(ap)
 
     #Store variables in sqlite database
 
