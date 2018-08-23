@@ -112,7 +112,6 @@ def on_click(x,y, button, pressed):
 with Listener(on_click=on_click) as listener:
         listener.join()  ### Run script X times ###
 
-global pc
 
 while 1 > 0:
 
@@ -121,10 +120,6 @@ while 1 > 0:
     ### Run through all ten images to compare results ###
 
     fV = [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1]
-
-    #Time
-
-    text_list = input_text[0].splitlines()
 
     [min, sec] = get_time([c1, c2, c3, c4])
 
@@ -159,15 +154,10 @@ while 1 > 0:
         fV[10] = get_number([c1, c2, c3, c4], [(c3 - c1) * 0.66, (c3 - c1) * 0.64], [(c4 - c2) * 0.88, (c4 - c2) * 0.79],10,c,fV[0],matchID)
         fV[11] = get_number([c1, c2, c3, c4], [(c3 - c1) * 0.85, (c3 - c1) * 0.83], [(c4 - c2) * 0.88, (c4 - c2) * 0.79],11,c,fV[0],matchID)
 
-    #Score
-    [fV[18],fV[19]] = OCRscore([c1, c2, c3, c4])
+        #Score
+        [fV[18],fV[19]] = OCRscore([c1, c2, c3, c4])
 
     print(fV)
-
-    #print("Vad får man på get attacks")
-
-    #ap = OCRattacks([c1, c2, c3, c4], 1)
-    #print(ap)
 
     #Store variables in sqlite database
 

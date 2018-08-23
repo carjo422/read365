@@ -57,6 +57,10 @@ def OCRattacks(cV, possession):
 
     image_string1 = pytesseract.image_to_string(bigimage1, config='-psm 7 -c tessedit_char_whitelist=0123456789')
 
+    #savestring = "attack_string.jpg"
+    #bigimage1 = bigimage1.convert("RGB")
+    #bigimage1.save(savestring, "JPEG")
+
     nums = get_all_numbers(image_string1)
 
     for i in range(0,len(nums)):
@@ -67,21 +71,11 @@ def OCRattacks(cV, possession):
 
     ap = [-1, -1, -1, -1, -1, -1]
 
-    if possession == 0 and len(nums) == 4:
-        for i in range(0, 3):
-            ap[i] = nums[i]
-
-    elif possession == 0 and len(nums) == 6:
-        ap[0] = nums[0]
-        ap[1] = nums[2]
-        ap[2] = nums[3]
-        ap[3] = nums[5]
-
-    elif possession == 1 and len(nums) == 6:
+    if len(nums) == 6:
         for i in range(0,5):
             ap[i] = nums[i]
 
-    elif possession == 1 and len(nums) == 9:
+    elif len(nums) == 9:
         ap[0] = nums[0]
         ap[1] = nums[2]
         ap[2] = nums[3]
@@ -89,56 +83,7 @@ def OCRattacks(cV, possession):
         ap[4] = nums[6]
         ap[5] = nums[8]
 
-
-    if ap[4] == -1 or ap[5] == -1:
-
-        pos1 = float(int(ap[0])) * 1.5
-        pos2 = float(int(ap[1])) * 1.5
-        pos3 = float(int(ap[2]))
-        pos4 = float(int(ap[3]))
-
-        if (pos1 + pos2 + pos3 + pos4) != 0:
-            ep1 = 100 * (pos1 + pos3) / (pos1 + pos2 + pos3 + pos4)
-            ep2 = 100 - ep1
-
-            est_pos1 = str(round(ep1))
-            est_pos2 = str(round(ep2))
-
-            ap[4] = int(est_pos1)
-            ap[5] = int(est_pos2)
-
-        else:
-            ap[4] = 50
-            ap[5] = 50
-
     return ap
-
-
-def check_possession(cV):
-
-    h1 = (cV[2] - cV[0]) * 0.04
-    h2 = (cV[2] - cV[0]) * 0.94
-
-    v1 = (cV[3] - cV[1]) * 0.70
-    v2 = (cV[3] - cV[1]) * 0.75
-
-    im1 = ImageGrab.grab(bbox=(cV[0] + h1, cV[1] + v1, cV[0] + h2, cV[1] + v2))
-
-    bigimage1 = im1.resize((int((h2 - h1) * 5), int((v2 - v1) * 5)), Image.NEAREST)
-
-    #bigimage1 = bigimage1.convert("RGB")
-    #bigimage1.save("test.jpg", "JPEG")
-
-    image_string1 = pytesseract.image_to_string(bigimage1, config='-psm 7')
-
-    nums = get_all_numbers(image_string1)
-
-    possession = 0
-
-    if "oss" in image_string1 or "ssi" in image_string1 or "ion" in image_string1:
-        possession=1
-
-    return possession
 
 
 def get_number(cV,xV,yV,pc,c,min,matchID):
@@ -163,10 +108,19 @@ def get_number(cV,xV,yV,pc,c,min,matchID):
         elif isnumber(image_string1):
             nm = int(image_string1)
 
-        savestring = "pic" + str(pc) + ".jpg"
+        if pc in [2,3,4,5,6,7]:
+            category = "Attacks"
+        elif pc in [8,9,10,11]:
+            category = "Shots"
+        elif pc in [16,17]:
+            category = "Corners"
+        elif pc in [12, 13, 14, 15]:
+            category = "Shots"
 
-        bigimage1 = bigimage1.convert("RGB")
-        bigimage1.save(savestring, "JPEG")
+        if x_diff != 0:
+            savestring = "/" + category + "/" + str(matchID) + "-" + str(pc) + "-" + str(x_diff) + ".jpg"
+            bigimage1 = bigimage1.convert("RGB")
+            bigimage1.save(savestring, "JPEG")
 
         nm = test_number(nm,pc,min,c,matchID)
 
@@ -178,6 +132,7 @@ def get_number(cV,xV,yV,pc,c,min,matchID):
         pass
     else:
         print("Trying other coords")
+
         nm = test_coords(0.01)
         if nm > -1:
             pass
