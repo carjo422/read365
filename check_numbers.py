@@ -54,7 +54,7 @@ def test_number(nm,pc,min,c,matchID):
     pc_vect = [2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17]
     var_vect = ["att1","att2","dng1","dng2","blank","blank","onT1","onT2","offT1","offT2","yel1","yel2","red1","red2","corn1","corn2"]
     t_vect = [1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0]
-    r_vect = [10,10,6,6,100,100,2,2,2,2,4,4,2,2,3,3]
+    r_vect = [15,15,12,12,100,100,2,2,2,2,4,4,2,2,3,3]
 
     name = ""
 
@@ -90,8 +90,6 @@ def test_number(nm,pc,min,c,matchID):
     c.execute("SELECT timeMin as timeMin FROM tradedata where ID = ?", [str(matchID)])
     minl = c.fetchall()
 
-    print("t is " + str(t))
-
     if len(minl) > 0:
         min_last = max(minl)[0]
     else:
@@ -104,7 +102,7 @@ def test_number(nm,pc,min,c,matchID):
             pass
         else:
             print("Value is incorrect. Min val is " + str(val - 1) + ". Max val is " + str(val + t * min_diff + r) + ". Real val is " + str(nm))
-            print("Expected value for " + name + " was " + val + "")
+            print("Expected value for " + name + " was " + str(val) + "")
             nm = -1
     else:
         if nm <= min*t+r and nm >= min*t-r:
