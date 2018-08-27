@@ -105,12 +105,13 @@ def test_number(nm,pc,min,c,matchID):
             print("Expected value for " + name + " was " + str(val) + "")
             nm = -1
     else:
-        if nm <= min*t+r and nm >= min*t-r:
-            pass
-        else:
-            print("Value is incorrect. Min val is " + str(min*t-r) + ". Max val is " + str(min*t+r) + ". Real val is " + str(nm))
-            print("Expected value for " + name + " was " + str(val) + "")
-            nm = -1
+        if min <= 15:
+            if nm <= min*t+r and nm >= min*t-r:
+                pass
+            else:
+                print("Value is incorrect. Min val is " + str(min*t-r) + ". Max val is " + str(min*t+r) + ". Real val is " + str(nm))
+                print("Expected value for " + name + " was " + str(val) + "")
+                nm = -1
 
     return nm
 

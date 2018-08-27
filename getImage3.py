@@ -157,6 +157,19 @@ while 1 > 0:
         #Score
         [fV[18],fV[19]] = OCRscore([c1, c2, c3, c4])
 
+        # Re check attacks
+        if fV[6] + fV[7] != 100:
+            fV[6] = -1
+            fV[7] = -1
+
+        if fV[2] == -1 or fV[3] == -1 or fV[4] == -1 or fV[5] == -1 or fV[6] == -1 or fV[7] == -1:
+
+            re_attack = OCRattacks([c1, c2, c3, c4], min, c, matchID)
+
+            for i in range(2,6):
+                if fV[i] == -1:
+                    fV[i] = re_attack[i-2]
+
     print(fV)
 
     #Store variables in sqlite database

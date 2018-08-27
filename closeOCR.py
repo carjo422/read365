@@ -43,13 +43,13 @@ def OCRscore(cV):
     scoreResult = [score1,score2]
     return scoreResult
 
-def OCRattacks(cV, possession):
+def OCRattacks(cV, min, c, matchID):
 
-    h1 = (cV[2] - cV[0]) * 0.04
-    h2 = (cV[2] - cV[0]) * 0.94
+    h1 = (cV[2] - cV[0]) * 0.52
+    h2 = (cV[2] - cV[0]) * 0.99
 
-    v1 = (cV[3] - cV[1]) * 0.75
-    v2 = (cV[3] - cV[1]) * 0.82
+    v1 = (cV[3] - cV[1]) * 0.50
+    v2 = (cV[3] - cV[1]) * 0.59
 
     im1 = ImageGrab.grab(bbox=(cV[0] + h1, cV[1] + v1, cV[0] + h2, cV[1] + v2))
 
@@ -57,9 +57,9 @@ def OCRattacks(cV, possession):
 
     image_string1 = pytesseract.image_to_string(bigimage1, config='-psm 7 -c tessedit_char_whitelist=0123456789')
 
-    #savestring = "attack_string.jpg"
-    #bigimage1 = bigimage1.convert("RGB")
-    #bigimage1.save(savestring, "JPEG")
+    savestring = "./pics/Attacks/attack_string.jpg"
+    bigimage1 = bigimage1.convert("RGB")
+    bigimage1.save(savestring, "JPEG")
 
     nums = get_all_numbers(image_string1)
 
@@ -72,7 +72,7 @@ def OCRattacks(cV, possession):
     ap = [-1, -1, -1, -1, -1, -1]
 
     if len(nums) == 6:
-        for i in range(0,5):
+        for i in range(0,6):
             ap[i] = nums[i]
 
     elif len(nums) == 9:
@@ -82,6 +82,39 @@ def OCRattacks(cV, possession):
         ap[3] = nums[5]
         ap[4] = nums[6]
         ap[5] = nums[8]
+
+    elif len(nums) == 7 or len(nums) == 8:
+
+        ap[0] = nums[0]
+
+        for i in range(1, 2):
+            if test_number(nums[i], 3, min, c, matchID) > -1:
+                ap[1] = nums[i]
+        for i in range(2, 3):
+            if test_number(nums[i], 4, min, c, matchID) > -1:
+                ap[2] = nums[i]
+        for i in range(3, 5):
+            if test_number(nums[i], 5, min, c, matchID) > -1:
+                ap[3] = nums[i]
+        for i in range(4, 7):
+            if len(nums) > i:
+                if test_number(nums[i], 6, min, c, matchID) > -1:
+                    ap[4] = nums[i]
+        for i in range(5, 7):
+            if len(nums) > i:
+                if test_number(nums[i], 7, min, c, matchID) > -1:
+                    ap[5] = nums[i]
+
+    ap[0] = test_number(ap[0], 2, min, c, matchID)
+    ap[1] = test_number(ap[1], 3, min, c, matchID)
+    ap[2] = test_number(ap[2], 4, min, c, matchID)
+    ap[3] = test_number(ap[3], 5, min, c, matchID)
+    ap[4] = test_number(ap[4], 6, min, c, matchID)
+    ap[5] = test_number(ap[5], 7, min, c, matchID)
+
+    if ap[4] + ap[5] != 100:
+        ap[4] = -1
+        ap[5] = -1
 
     return ap
 
@@ -118,7 +151,7 @@ def get_number(cV,xV,yV,pc,c,min,matchID):
             category = "Shots"
 
         if x_diff != 0:
-            savestring = "/" + category + "/" + str(matchID) + "-" + str(pc) + "-" + str(x_diff) + ".jpg"
+            savestring = "./pics/" + category + "/" + str(matchID) + "-" + str(pc) + "-" + str(x_diff) + ".jpg"
             bigimage1 = bigimage1.convert("RGB")
             bigimage1.save(savestring, "JPEG")
 
@@ -141,23 +174,23 @@ def get_number(cV,xV,yV,pc,c,min,matchID):
             if nm > -1:
                 pass
             else:
-                nm = test_coords(-0.01)
+                nm = test_coords(0.015)
                 if nm > -1:
                     pass
                 else:
-                    nm = test_coords(0.02)
+                    nm = test_coords(-0.015)
                     if nm > -1:
                         pass
                     else:
-                        nm = test_coords(-0.02)
+                        nm = test_coords(0.02)
                         if nm > -1:
                             pass
                         else:
-                            nm = test_coords(0.03)
+                            nm = test_coords(-0.02)
                             if nm > -1:
                                 pass
                             else:
-                                nm = test_coords(-0.03)
+                                nm = test_coords(-0.025)
 
     return nm
 
